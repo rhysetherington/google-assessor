@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Python ${{ matrix.python }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      # The suite is fully offline: gcloud is replaced by fixtures (tests_python/fakes.py). No project, account or secrets are used,
+      # the Google Cloud CLI does not need to be installed, and the package has no third-party dependencies.
+      - name: Run tests
+        run: python -m unittest discover -s tests_python -t . -v
+
+      - name: Docs are up to date
+        run: python -m gcp_gap_assessment.coverage --check

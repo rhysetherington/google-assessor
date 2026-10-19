@@ -1,0 +1,22 @@
+# default --export-path of the assessor: reports hold real project data
+GcpAssessment/
+Assessments/
+.DS_Store
+# never commit credentials, keys or client-specific inputs
+*.pfx
+*.pem
+*.key
+*.env
+*.p12
+*-credentials.json
+*service-account*.json
+*accepted*.json
+*.log
+
+# CIS benchmark exports are licensed content; keep them out of the repository
+Docs/*benchmark*.csv
+*cis-benchmark*.csv
+
+# Python
+__pycache__/
+*.pyc

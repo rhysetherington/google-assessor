@@ -1,0 +1,672 @@
+{
+  "version": "1.0.0",
+  "notes": "CIS Google Cloud Platform Foundation Benchmark recommendation numbers ('cis') are mapped only where a check clearly tests the same setting; unmapped checks have no CIS equivalent. Numbers follow v3.0.0 and should be confirmed against the edition you hold, as the benchmark is renumbered between releases. SCF control IDs and NIST CSF 2.0 subcategories are best-fit mappings; validate against the SCF release your client uses. Finding IDs are never reused or renumbered: retiredIds lists numbers that were reserved but never shipped.",
+  "retiredIds": [],
+  "controls": [
+    {
+      "id": "CMP-001",
+      "domain": "Compute Engine",
+      "name": "Instances use the default Compute Engine service account",
+      "severity": "Medium",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "4.1"
+      ],
+      "remediation": [
+        "Create a dedicated service account per workload and recreate or reconfigure the instance to use it (stop the instance to change its service account)."
+      ]
+    },
+    {
+      "id": "CMP-002",
+      "domain": "Compute Engine",
+      "name": "Default service account with full access to all Cloud APIs",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "4.2"
+      ],
+      "remediation": [
+        "Use a dedicated service account with only the required IAM roles.",
+        "Where the default account must stay, replace the cloud-platform scope with only the scopes the workload needs."
+      ]
+    },
+    {
+      "id": "CMP-003",
+      "domain": "Compute Engine",
+      "name": "Instances accept project-wide SSH keys",
+      "severity": "Medium",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "4.3"
+      ],
+      "remediation": [
+        "Set metadata block-project-ssh-keys=TRUE on the instance, or switch to OS Login (CMP-004)."
+      ]
+    },
+    {
+      "id": "CMP-004",
+      "domain": "Compute Engine",
+      "name": "OS Login not enabled",
+      "severity": "Medium",
+      "scf": "IAC-02",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "4.4"
+      ],
+      "remediation": [
+        "Set project metadata enable-oslogin=TRUE (Compute Engine > Metadata) and remove instance-level overrides set to FALSE.",
+        "Enforce compute.requireOsLogin (ORG-003)."
+      ]
+    },
+    {
+      "id": "CMP-005",
+      "domain": "Compute Engine",
+      "name": "Serial port access enabled",
+      "severity": "Medium",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [
+        "4.5"
+      ],
+      "remediation": [
+        "Remove or set to FALSE the serial-port-enable metadata on the project and instances.",
+        "Enforce compute.disableSerialPortAccess (ORG-008)."
+      ]
+    },
+    {
+      "id": "CMP-006",
+      "domain": "Compute Engine",
+      "name": "IP forwarding enabled on instances",
+      "severity": "Medium",
+      "scf": "NET-01",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "4.6"
+      ],
+      "remediation": [
+        "IP forwarding can only be changed at creation: recreate the instance with it off unless it is a router or appliance."
+      ]
+    },
+    {
+      "id": "CMP-007",
+      "domain": "Compute Engine",
+      "name": "Shielded VM vTPM or integrity monitoring off",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [
+        "4.8"
+      ],
+      "remediation": [
+        "Stop the instance, Edit > Shielded VM: turn on vTPM and Integrity monitoring (and Secure Boot where the image supports it)."
+      ]
+    },
+    {
+      "id": "CMP-008",
+      "domain": "Compute Engine",
+      "name": "Instances have external IP addresses",
+      "severity": "Medium",
+      "scf": "NET-03",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "4.9"
+      ],
+      "remediation": [
+        "Remove the external IP (Edit > Network interfaces > External IPv4: None) and use Cloud NAT, IAP or a load balancer for access.",
+        "Enforce compute.vmExternalIpAccess (ORG-004)."
+      ]
+    },
+    {
+      "id": "IAM-001",
+      "domain": "Identity and IAM",
+      "name": "Owner or Editor role granted to users, groups or domains",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find principals with Owner or Editor.",
+        "Replace each with predefined roles that match the job (for example Compute Viewer, Storage Object Admin) or a custom role.",
+        "Keep Owner for a small number of named administrators and review it with IAM Recommender (gcloud recommender recommendations list --recommender=google.iam.policy.Recommender)."
+      ]
+    },
+    {
+      "id": "IAM-002",
+      "domain": "Identity and IAM",
+      "name": "Service accounts with administrative privileges",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "1.5"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find service accounts holding Owner, Editor or an *admin role.",
+        "Replace them with the narrowest predefined or custom role the workload needs.",
+        "Use IAM Recommender to see which permissions the account actually used."
+      ]
+    },
+    {
+      "id": "IAM-003",
+      "domain": "Identity and IAM",
+      "name": "Project IAM policy grants roles to allUsers or allAuthenticatedUsers",
+      "severity": "Critical",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > IAM; remove the allUsers and allAuthenticatedUsers bindings.",
+        "If public access is intended, grant it on the individual resource instead of the project and document the exception.",
+        "Enforce the iam.allowedPolicyMemberDomains organisation policy (ORG-005) so public grants cannot return."
+      ]
+    },
+    {
+      "id": "IAM-004",
+      "domain": "Identity and IAM",
+      "name": "User-managed service account keys exist",
+      "severity": "High",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.4"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > Service Accounts > Keys; list the user-managed keys.",
+        "Move workloads to attached service accounts, Workload Identity Federation or short-lived impersonation, then delete the keys.",
+        "Enforce the iam.disableServiceAccountKeyCreation organisation policy (ORG-001)."
+      ]
+    },
+    {
+      "id": "IAM-005",
+      "domain": "Identity and IAM",
+      "name": "User-managed service account keys not rotated within 90 days",
+      "severity": "High",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.7"
+      ],
+      "remediation": [
+        "Create a replacement key, deploy it, then delete the old key; repeat at least every 90 days.",
+        "Better: remove the need for keys (see IAM-004).",
+        "Use Cloud Asset Inventory or a scheduled job to alert on keys approaching 90 days."
+      ]
+    },
+    {
+      "id": "IAM-006",
+      "domain": "Identity and IAM",
+      "name": "Users hold Service Account User or Token Creator at project level",
+      "severity": "Medium",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "1.6"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find roles/iam.serviceAccountUser and roles/iam.serviceAccountTokenCreator.",
+        "Grant the role on the specific service account (Service Accounts > Permissions) rather than on the project."
+      ]
+    },
+    {
+      "id": "IAM-007",
+      "domain": "Identity and IAM",
+      "name": "Access granted to non-corporate accounts",
+      "severity": "Medium",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.1"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; review principals outside your corporate domains.",
+        "Replace personal accounts with managed identities (Cloud Identity / Google Workspace) or groups.",
+        "Enforce the iam.allowedPolicyMemberDomains organisation policy (ORG-005)."
+      ]
+    },
+    {
+      "id": "IAM-008",
+      "domain": "Identity and IAM",
+      "name": "Default service accounts hold Editor or Owner",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Create dedicated service accounts per workload with only the roles they need.",
+        "Remove Editor from the default Compute Engine and App Engine service accounts once nothing depends on it.",
+        "Enforce iam.automaticIamGrantsForDefaultServiceAccounts (ORG-009) so new projects do not grant it."
+      ]
+    },
+    {
+      "id": "IAM-009",
+      "domain": "Identity and IAM",
+      "name": "Separation of duties: one principal is Service Account Admin and Service Account User",
+      "severity": "Medium",
+      "scf": "HRS-11",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "1.8"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find principals with both roles/iam.serviceAccountAdmin and roles/iam.serviceAccountUser.",
+        "Split the roles between different principals or groups."
+      ]
+    },
+    {
+      "id": "IAM-010",
+      "domain": "Identity and IAM",
+      "name": "API keys without restrictions",
+      "severity": "High",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.13",
+        "1.14"
+      ],
+      "remediation": [
+        "Console > APIs & Services > Credentials; open each key and set an application restriction and an API restriction.",
+        "Delete keys that are not needed; prefer OAuth or service account credentials where possible."
+      ]
+    },
+    {
+      "id": "IAM-011",
+      "domain": "Identity and IAM",
+      "name": "API keys older than 90 days",
+      "severity": "Low",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.15"
+      ],
+      "remediation": [
+        "Console > APIs & Services > Credentials; create a replacement key, update the application, delete the old key.",
+        "Repeat at least every 90 days or remove the need for the key."
+      ]
+    },
+    {
+      "id": "KMS-001",
+      "domain": "Cloud KMS",
+      "name": "Cloud KMS keys are publicly accessible",
+      "severity": "Critical",
+      "scf": "CRY-09",
+      "nistCsf": "PR.DS-01",
+      "cis": [
+        "1.9"
+      ],
+      "remediation": [
+        "Console > Security > Key Management > key > Permissions; remove allUsers and allAuthenticatedUsers."
+      ]
+    },
+    {
+      "id": "KMS-002",
+      "domain": "Cloud KMS",
+      "name": "Cloud KMS keys not rotated within 90 days",
+      "severity": "Medium",
+      "scf": "CRY-09",
+      "nistCsf": "PR.DS-01",
+      "cis": [
+        "1.10"
+      ],
+      "remediation": [
+        "Console > Security > Key Management > key > Edit rotation period: set 90 days or less."
+      ]
+    },
+    {
+      "id": "LOG-001",
+      "domain": "Logging and monitoring",
+      "name": "Cloud Audit Logs not fully enabled",
+      "severity": "High",
+      "scf": "MON-03",
+      "nistCsf": "PR.PS-04",
+      "cis": [
+        "2.1"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > Audit Logs; enable Admin Read, Data Read and Data Write for All services and remove exempted principals.",
+        "Or set auditConfigs on the project IAM policy (gcloud projects get-iam-policy / set-iam-policy), ideally at organisation level.",
+        "Data access logs cost money; use log buckets and exclusions deliberately rather than leaving them off."
+      ]
+    },
+    {
+      "id": "LOG-002",
+      "domain": "Logging and monitoring",
+      "name": "No log sink exports all log entries",
+      "severity": "Medium",
+      "scf": "MON-02",
+      "nistCsf": "PR.PS-04",
+      "cis": [
+        "2.2"
+      ],
+      "remediation": [
+        "Console > Logging > Log Router > Create sink with no inclusion filter, to Cloud Storage, BigQuery or Pub/Sub.",
+        "Prefer an aggregated sink on the organisation or a folder (--include-children) so new projects are covered."
+      ]
+    },
+    {
+      "id": "LOG-003",
+      "domain": "Logging and monitoring",
+      "name": "Log export bucket without a locked retention policy",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [
+        "2.3"
+      ],
+      "remediation": [
+        "Console > Cloud Storage > bucket > Protection > Retention policy; set a period that matches your policy.",
+        "Lock the policy (cannot be reduced or removed afterwards, so confirm the period first)."
+      ]
+    },
+    {
+      "id": "NET-001",
+      "domain": "Networking",
+      "name": "Default network exists",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.1"
+      ],
+      "remediation": [
+        "Create purpose-built VPC networks and subnets, move workloads over, then delete the default network.",
+        "Enforce compute.skipDefaultNetworkCreation (ORG-007) for new projects."
+      ]
+    },
+    {
+      "id": "NET-002",
+      "domain": "Networking",
+      "name": "Legacy network exists",
+      "severity": "Medium",
+      "scf": "NET-01",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.2"
+      ],
+      "remediation": [
+        "Migrate workloads to a VPC network with subnets, then delete the legacy network."
+      ]
+    },
+    {
+      "id": "NET-003",
+      "domain": "Networking",
+      "name": "SSH (22) allowed from the internet",
+      "severity": "High",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.6"
+      ],
+      "remediation": [
+        "Console > VPC network > Firewall; edit or delete rules that allow tcp:22 from 0.0.0.0/0.",
+        "Use Identity-Aware Proxy TCP forwarding (source 35.235.240.0/20) or OS Login with a bastion instead."
+      ]
+    },
+    {
+      "id": "NET-004",
+      "domain": "Networking",
+      "name": "RDP (3389) allowed from the internet",
+      "severity": "High",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.7"
+      ],
+      "remediation": [
+        "Console > VPC network > Firewall; edit or delete rules that allow tcp:3389 from 0.0.0.0/0.",
+        "Use Identity-Aware Proxy TCP forwarding or a VPN instead."
+      ]
+    },
+    {
+      "id": "NET-005",
+      "domain": "Networking",
+      "name": "All protocols or ports allowed from the internet",
+      "severity": "Critical",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Console > VPC network > Firewall; replace allow-all ingress rules from 0.0.0.0/0 with rules for the specific ports and sources needed."
+      ]
+    },
+    {
+      "id": "NET-006",
+      "domain": "Networking",
+      "name": "VPC Flow Logs disabled on subnets",
+      "severity": "Medium",
+      "scf": "MON-01",
+      "nistCsf": "DE.CM-01",
+      "cis": [
+        "3.8"
+      ],
+      "remediation": [
+        "Console > VPC network > subnet > Edit > Flow logs: On. Tune the sampling rate and metadata to control cost."
+      ]
+    },
+    {
+      "id": "NET-007",
+      "domain": "Networking",
+      "name": "DNSSEC disabled on public DNS zones",
+      "severity": "Medium",
+      "scf": "NET-10",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.3"
+      ],
+      "remediation": [
+        "Console > Cloud DNS > zone > DNSSEC: On, then add the DS record at the registrar."
+      ]
+    },
+    {
+      "id": "NET-008",
+      "domain": "Networking",
+      "name": "DNSSEC uses RSASHA1 signing",
+      "severity": "Low",
+      "scf": "CRY-01",
+      "nistCsf": "PR.DS-02",
+      "cis": [
+        "3.4",
+        "3.5"
+      ],
+      "remediation": [
+        "Change the zone's key signing and zone signing algorithms to RSASHA256 or ECDSAP256SHA256 and update the DS record."
+      ]
+    },
+    {
+      "id": "ORG-001",
+      "domain": "Organization policy",
+      "name": "Service account key creation is not blocked (iam.disableServiceAccountKeyCreation)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Disable service account key creation: Enforce (organisation, folder or project)."
+      ]
+    },
+    {
+      "id": "ORG-002",
+      "domain": "Organization policy",
+      "name": "Public access prevention not enforced (storage.publicAccessPrevention)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Enforce public access prevention: Enforce."
+      ]
+    },
+    {
+      "id": "ORG-003",
+      "domain": "Organization policy",
+      "name": "OS Login not required (compute.requireOsLogin)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Require OS Login: Enforce."
+      ]
+    },
+    {
+      "id": "ORG-004",
+      "domain": "Organization policy",
+      "name": "External IPs on VMs not denied (compute.vmExternalIpAccess)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Define allowed external IPs for VM instances: Deny all (allow named exceptions)."
+      ]
+    },
+    {
+      "id": "ORG-005",
+      "domain": "Organization policy",
+      "name": "Domain restricted sharing not set (iam.allowedPolicyMemberDomains)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Domain restricted sharing: Allow only your Cloud Identity / Workspace customer IDs."
+      ]
+    },
+    {
+      "id": "ORG-006",
+      "domain": "Organization policy",
+      "name": "Public Cloud SQL IPs not restricted (sql.restrictPublicIp)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Restrict public IP access on Cloud SQL instances: Enforce."
+      ]
+    },
+    {
+      "id": "ORG-007",
+      "domain": "Organization policy",
+      "name": "Default network is still created for new projects (compute.skipDefaultNetworkCreation)",
+      "severity": "Low",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Skip default network creation: Enforce."
+      ]
+    },
+    {
+      "id": "ORG-008",
+      "domain": "Organization policy",
+      "name": "Serial port access not disabled (compute.disableSerialPortAccess)",
+      "severity": "Low",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Disable VM serial port access: Enforce."
+      ]
+    },
+    {
+      "id": "ORG-009",
+      "domain": "Organization policy",
+      "name": "Default service accounts get Editor automatically (iam.automaticIamGrantsForDefaultServiceAccounts)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Disable automatic IAM grants for default service accounts: Enforce."
+      ]
+    },
+    {
+      "id": "SQL-001",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL instances have public IP addresses",
+      "severity": "High",
+      "scf": "NET-03",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "6.6"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Connections: use Private IP and remove the public IP.",
+        "Enforce sql.restrictPublicIp (ORG-006)."
+      ]
+    },
+    {
+      "id": "SQL-002",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL authorized networks include 0.0.0.0/0",
+      "severity": "High",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "6.5"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Connections > Authorized networks; remove 0.0.0.0/0 and list only the addresses that need access (or use the Cloud SQL Auth Proxy)."
+      ]
+    },
+    {
+      "id": "SQL-003",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL instances accept unencrypted connections",
+      "severity": "High",
+      "scf": "CRY-03",
+      "nistCsf": "PR.DS-02",
+      "cis": [
+        "6.4"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Connections > Security: require SSL / encrypted connections only."
+      ]
+    },
+    {
+      "id": "SQL-004",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL automated backups disabled",
+      "severity": "Medium",
+      "scf": "BCD-11",
+      "nistCsf": "PR.DS-11",
+      "cis": [
+        "6.7"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Backups: enable automated backups and point-in-time recovery, and test a restore."
+      ]
+    },
+    {
+      "id": "STO-001",
+      "domain": "Cloud Storage",
+      "name": "Buckets are publicly accessible",
+      "severity": "Critical",
+      "scf": "IAC-20",
+      "nistCsf": "PR.DS-01",
+      "cis": [
+        "5.1"
+      ],
+      "remediation": [
+        "Console > Cloud Storage > bucket > Permissions; remove allUsers and allAuthenticatedUsers.",
+        "Turn on public access prevention for the bucket and enforce storage.publicAccessPrevention (ORG-002)."
+      ]
+    },
+    {
+      "id": "STO-002",
+      "domain": "Cloud Storage",
+      "name": "Uniform bucket-level access disabled",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "5.2"
+      ],
+      "remediation": [
+        "Console > Cloud Storage > bucket > Permissions > Access control: Uniform. Check that nothing relies on object ACLs first."
+      ]
+    }
+  ]
+}
