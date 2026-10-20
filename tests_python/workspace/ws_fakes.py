@@ -241,6 +241,12 @@ class Tenant:
         resolver = FakeResolver(self.dns)
         return WsContext(client=client, directory=Directory(client), resolver=resolver, domains=[d['domainName'] for d in self.domains], options=options or WsOptions(), clock=lambda: NOW)
 
+    def session(self, options: "WsOptions | None" = None):
+        """A connected-tenant object as ``connect_workspace`` would return it."""
+        from google_gap_assessment.workspace.session import WsSession
+        ctx = self.context(options)
+        return WsSession(ctx=ctx, customer_id="C0123abcd", primary_domain=TENANT, domains=ctx.domains, account="admin@contoso.com")
+
     # -- mutation helpers ----------------------------------------------------------------------------------------------
     def override(self, ou_path: str, setting: str, value: Any, group: "str | None" = None, order: int = 0) -> None:
         self.overrides.append((ou_path, group, setting, value, order))
