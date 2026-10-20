@@ -67,6 +67,8 @@ DEFAULTS: "dict[str, dict[str, Any]]" = {
     "security.two_step_verification_grace_period": {"enrollmentGracePeriod": "0s"},
     "security.user_account_recovery": {"enableAccountRecovery": False},
     "workspace_marketplace.apps_access_options": {"accessLevel": "ALLOW_ALL", "allowAllInternalApps": False},
+    # Only restricted Google services are listed by the API, so "no policy" means nothing is restricted (as CISA's reference tool reads it).
+    "api_controls.google_services": {"services": []},
     "access_management.user_scoping": {"accessManagementRegime": "PREFERENCE_UNSPECIFIED"},
     "access_approval.axa_user_scoping": {"requiresCustomerApproval": False},
 }
@@ -171,4 +173,28 @@ def judge(policies: PolicySet, setting: str, compliant: Callable[[Any], "Optiona
     for label, value in policies.overrides(setting):
         if compliant({**top, **value}) is False:
             verdict.bad.append((label, {**top, **value}))
+    return verdict
+
+
+def judge_many(policies: PolicySet, settings: "list[str]", compliant: Callable[[dict], "Optional[bool]"]) -> Verdict:
+    """Like ``judge`` for a question that needs several settings at once (e.g. "enrolment allowed AND enforcement date has passed").
+
+    ``compliant`` receives ``{setting: values}``. It is asked at the top level and at every OU or group that overrides any of the
+    settings, with that scope's own fields laid over the top-level values.
+    """
+    tops = {name: policies.top(name) for name in settings}
+    if any(v is None for v in tops.values()):
+        return Verdict(unknown=True)
+    by_scope: "dict[str, dict[str, Any]]" = {}
+    for name in settings:
+        for label, value in policies.overrides(name):
+            by_scope.setdefault(label, {})[name] = value
+    verdict = Verdict()
+    for label in [TOP] + sorted(by_scope):
+        view = {name: {**tops[name], **by_scope.get(label, {}).get(name, {})} for name in settings}
+        answer = compliant(view)
+        if answer is None and label == TOP:
+            verdict.unreadable_field = True
+        elif answer is False:
+            verdict.bad.append((label, view))
     return verdict

@@ -50,6 +50,7 @@ def new_finding(finding_id: str, status: str = "Gap", affected: "Iterable[str]" 
         "FindingId": finding_id,
         "Name": mapping["name"],
         "Domain": mapping["domain"],
+        "Source": mapping.get("source", "cloud"),
         "Severity": mapping["severity"],
         "Status": status,
         "AffectedCount": len(affected_list),

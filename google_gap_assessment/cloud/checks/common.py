@@ -10,6 +10,7 @@ from typing import Callable, Iterable, Iterator, NamedTuple
 from ..gcloud import Gcloud
 from ...model import Options
 from ...registry import Check, registrar, run_checks  # noqa: F401 - re-exported for the domain modules
+from ...util import has_items, leaf, older_than, parse_time, unique  # noqa: F401 - re-exported for the domain modules
 
 
 @dataclass
@@ -57,34 +58,3 @@ def service_account_kind(email: str) -> str:
     return "Other"
 
 
-def leaf(name: "str | None") -> str:
-    """Last path segment of a resource URL or name (".../zones/europe-west2-a" -> "europe-west2-a")."""
-    return str(name).rsplit("/", 1)[-1] if name else ""
-
-
-def parse_time(value: "str | None") -> "datetime | None":
-    """Parse a gcloud timestamp ("2024-01-01T00:00:00Z", possibly with nanoseconds) as UTC, or None."""
-    if not value:
-        return None
-    text = str(value).replace("Z", "+00:00")
-    text = re.sub(r"(\.\d{6})\d+", r"\1", text)  # fromisoformat accepts at most microseconds
-    try:
-        parsed = datetime.fromisoformat(text)
-    except ValueError:
-        return None
-    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
-
-
-def older_than(value: "str | None", days: int) -> bool:
-    parsed = parse_time(value)
-    if parsed is None:
-        return False
-    return (datetime.now(timezone.utc) - parsed).days >= days
-
-
-def has_items(value: object) -> bool:
-    return bool(value) and any(v is not None for v in (value if isinstance(value, (list, tuple)) else [value]))
-
-
-def unique(items: Iterable[str]) -> "list[str]":
-    return list(dict.fromkeys(items))

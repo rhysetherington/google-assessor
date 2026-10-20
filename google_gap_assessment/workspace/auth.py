@@ -82,8 +82,8 @@ class AdcTokenProvider:
         return self._token
 
 
-def token_scopes(token: str, post: "Callable[..., dict] | None" = None) -> "set[str]":
-    """The scopes an access token actually holds, asked of Google's tokeninfo endpoint (the token goes in the POST body, not the URL)."""
+def token_info(token: str, post: "Callable[..., dict] | None" = None) -> dict:
+    """What Google says about an access token (its scopes and the account it belongs to). The token goes in the POST body, not the URL."""
     def default_post(url: str, data: dict) -> dict:
         request = urllib.request.Request(url, data=urllib.parse.urlencode(data).encode(), method="POST",
                                          headers={"Content-Type": "application/x-www-form-urlencoded"})
@@ -94,8 +94,12 @@ def token_scopes(token: str, post: "Callable[..., dict] | None" = None) -> "set[
             raise ApiError(f"tokeninfo returned HTTP {exc.code}", "Auth") from exc
         except urllib.error.URLError as exc:
             raise ApiError(f"network error: {exc.reason}", "Transient") from exc
-    info = (post or default_post)("https://oauth2.googleapis.com/tokeninfo", {"access_token": token})
-    return set(str(info.get("scope", "")).split())
+    return (post or default_post)("https://oauth2.googleapis.com/tokeninfo", {"access_token": token})
+
+
+def token_scopes(token: str, post: "Callable[..., dict] | None" = None) -> "set[str]":
+    """The scopes an access token actually holds."""
+    return set(str(token_info(token, post).get("scope", "")).split())
 
 
 def missing_scopes(granted: "set[str]") -> "list[str]":

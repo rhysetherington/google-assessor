@@ -150,10 +150,10 @@ class Mapping(unittest.TestCase):
     def test_every_control_is_complete_sorted_and_used_by_a_collector(self):
         ids = list(CONTROL_MAPPING)
         self.assertEqual(sorted(ids), ids)
-        code = "\n".join(p.read_text() for p in (PKG / "cloud" / "checks").glob("*.py"))
+        code = "\n".join(p.read_text() for p in list((PKG / "cloud" / "checks").glob("*.py")) + list((PKG / "workspace" / "checks").glob("*.py")))
         for cid, c in CONTROL_MAPPING.items():
             with self.subTest(cid):
-                self.assertRegex(cid, r"^(IAM|LOG|NET|CMP|STO|SQL|KMS|ORG)-\d{3}$")
+                self.assertRegex(cid, r"^(IAM|LOG|NET|CMP|STO|SQL|KMS|ORG|GID)-\d{3}$")
                 self.assertIn(c["severity"], ("Critical", "High", "Medium", "Low"))
                 self.assertRegex(c["scf"], r"^[A-Z]{3}-\d{2}$")
                 self.assertRegex(c["nistCsf"], r"^(GV|ID|PR|DE|RS|RC)\.[A-Z]{2}-\d{2}$")
@@ -163,8 +163,8 @@ class Mapping(unittest.TestCase):
                 self.assertIn(f'"{cid}"', code, f"{cid} is not produced by any collector")
 
     def test_every_id_used_in_code_has_a_mapping_entry(self):
-        code = "\n".join(p.read_text() for p in (PKG / "cloud" / "checks").glob("*.py"))
-        used = set(re.findall(r'"((?:IAM|LOG|NET|CMP|STO|SQL|KMS|ORG)-\d{3})"', code))
+        code = "\n".join(p.read_text() for p in list((PKG / "cloud" / "checks").glob("*.py")) + list((PKG / "workspace" / "checks").glob("*.py")))
+        used = set(re.findall(r'"((?:IAM|LOG|NET|CMP|STO|SQL|KMS|ORG|GID)-\d{3})"', code))
         self.assertEqual(set(), used - set(CONTROL_MAPPING))
 
 

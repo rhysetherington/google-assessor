@@ -33,7 +33,8 @@ class Registry(unittest.TestCase):
 
     def test_mapping_domain_names_match_the_module(self):
         names = {"Iam": "Identity and IAM", "Logging": "Logging and monitoring", "Network": "Networking", "Compute": "Compute Engine",
-                 "Storage": "Cloud Storage", "Sql": "Cloud SQL", "Kms": "Cloud KMS", "OrgPolicy": "Organization policy"}
+                 "Storage": "Cloud Storage", "Sql": "Cloud SQL", "Kms": "Cloud KMS", "OrgPolicy": "Organization policy",
+                 "Identity": "Workspace: Identity and access"}
         for cid, domain in CHECK_INDEX.items():
             with self.subTest(cid):
                 self.assertEqual(names[domain], CONTROL_MAPPING[cid]["domain"])
@@ -93,7 +94,7 @@ class Cli(unittest.TestCase):
         with redirect_stdout(out):
             self.assertEqual(0, main(["--list-checks"], gcloud=None))
         lines = out.getvalue().strip().splitlines()
-        self.assertEqual(47, len(lines))
+        self.assertEqual(len(CONTROL_MAPPING), len(lines))
         self.assertTrue(any(line.startswith("IAM-003  Iam") for line in lines))
 
     def test_check_flag_redoes_one_check_from_the_command_line(self):

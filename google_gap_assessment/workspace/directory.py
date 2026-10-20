@@ -60,3 +60,8 @@ class Directory:
     def role_assignments(self) -> "list[dict]":
         return self._once("role_assignments", lambda: self._client.items(
             f"{BASE}/customer/my_customer/roleassignments", {"maxResults": 200, "fields": "nextPageToken,items(roleId,assignedTo,assigneeType,scopeType,orgUnitId)"}))
+
+    def sso_assignments(self) -> "list[dict]":
+        """Which OUs or groups sign in through an external identity provider (Cloud Identity inbound SSO assignments)."""
+        return self._once("sso", lambda: self._client.items(
+            "https://cloudidentity.googleapis.com/v1/inboundSsoAssignments", {"pageSize": 100}, key="inboundSsoAssignments"))

@@ -44,12 +44,18 @@ def score_text(a: dict) -> str:
 
 
 def scope_text(a: dict) -> str:
-    n = len(a["Scope"]["Projects"])
-    text = f"{n} project{'s' if n != 1 else ''}"
-    if a["Scope"].get("OrganizationId"):
-        text += f", organisation {a['Scope']['OrganizationId']}"
-    if a["Scope"].get("FolderId"):
-        text += f", folder {a['Scope']['FolderId']}"
+    sc, parts = a["Scope"], []
+    if sc.get("Workspace"):
+        parts.append(f"Google Workspace tenant {sc['Workspace']['PrimaryDomain']}")
+    if sc.get("Projects"):
+        n = len(sc["Projects"])
+        text = f"{n} Google Cloud project{'s' if n != 1 else ''}"
+        if sc.get("OrganizationId"):
+            text += f", organisation {sc['OrganizationId']}"
+        if sc.get("FolderId"):
+            text += f", folder {sc['FolderId']}"
+        parts.append(text)
+    text = "; ".join(parts) or "nothing"
     if a.get("OnlyChecks"):  # a re-run of specific checks must not be mistaken for a full assessment
         text += f". PARTIAL ASSESSMENT: only {', '.join(a['OnlyChecks'])} were run"
     return text
@@ -90,8 +96,14 @@ def to_markdown(a: dict, evidence_root: "Path | None" = None) -> str:
            f"| Gaps | {s['Gaps']} |", f"| Not assessed (permission or error) | {s['NotAssessed']} |"]
     if s["Accepted"]: md.append(f"| Accepted risks | {s['Accepted']} |")
     md += ["", f"| Critical | High | Medium | Low |\n|:-:|:-:|:-:|:-:|\n| {sev['Critical']} | {sev['High']} | {sev['Medium']} | {sev['Low']} |", "",
-           "## Projects Assessed", "", "| Project | Name | Number |\n|---|---|---|"]
-    md += [f"| {md_cell(p['ProjectId'])} | {md_cell(p['Name'])} | {md_cell(p['ProjectNumber'])} |" for p in a["Scope"]["Projects"]]
+           ]
+    ws = a["Scope"].get("Workspace")
+    if ws:
+        md += ["## Google Workspace Tenant", "", "| | |\n|---|---|", f"| **Primary domain** | {md_cell(ws['PrimaryDomain'])} |",
+               f"| **Domains checked** | {md_cell(', '.join(ws['Domains']))} |", ""]
+    if a["Scope"].get("Projects"):
+        md += ["## Projects Assessed", "", "| Project | Name | Number |\n|---|---|---|"]
+        md += [f"| {md_cell(p['ProjectId'])} | {md_cell(p['Name'])} | {md_cell(p['ProjectNumber'])} |" for p in a["Scope"]["Projects"]]
     md += ["", "## Control Compliance Matrix (NIST CSF 2.0 / SCF)", "", "| NIST CSF 2.0 | SCF | Status | Findings |\n|---|---|---|---|"]
     md += [f"| {r['Nist']} | {r['Scf']} | {r['Status']} | {r['Finding']} |" for r in compliance_matrix(f)]
     md += ["", "## Detailed Findings by Domain"]
@@ -164,9 +176,16 @@ def to_html(a: dict, brand_color: "str | None" = None, evidence_root: "Path | No
     na = [x for x in f if x["Status"] == "NotAssessed"]
     if na:
         out.append("<section><h2>Checks not assessed</h2><ul>" + "".join(f"<li><code>{e(n['FindingId'])}</code> {e(n['Name'])}: {e(n['Detail'])}</li>" for n in na) + "</ul></section>")
-    out.append('<section><h2>Appendix</h2><details><summary>Projects assessed</summary><div class="body"><table><tr><th>Project</th><th>Name</th><th>Number</th></tr>')
-    out += [f"<tr><td>{e(p['ProjectId'])}</td><td>{e(p['Name'])}</td><td>{e(p['ProjectNumber'])}</td></tr>" for p in a["Scope"]["Projects"]]
-    out.append('</table></div></details><details><summary>Control compliance matrix (NIST CSF 2.0 / SCF)</summary><div class="body"><table><tr><th>NIST CSF 2.0</th><th>SCF</th><th>Status</th><th>Findings</th></tr>')
+    out.append('<section><h2>Appendix</h2>')
+    ws = a["Scope"].get("Workspace")
+    if ws:
+        out.append(f'<details><summary>Google Workspace tenant</summary><div class="body"><table><tr><th>Primary domain</th><td>{e(ws["PrimaryDomain"])}</td></tr>'
+                   f'<tr><th>Domains checked</th><td>{e(", ".join(ws["Domains"]))}</td></tr></table></div></details>')
+    if a["Scope"].get("Projects"):
+        out.append('<details><summary>Projects assessed</summary><div class="body"><table><tr><th>Project</th><th>Name</th><th>Number</th></tr>')
+        out += [f"<tr><td>{e(p['ProjectId'])}</td><td>{e(p['Name'])}</td><td>{e(p['ProjectNumber'])}</td></tr>" for p in a["Scope"]["Projects"]]
+        out.append('</table></div></details>')
+    out.append('<details><summary>Control compliance matrix (NIST CSF 2.0 / SCF)</summary><div class="body"><table><tr><th>NIST CSF 2.0</th><th>SCF</th><th>Status</th><th>Findings</th></tr>')
     for r in compliance_matrix(f):
         cls = {"Gap": "s-Gap", "Pass": "s-Pass", "Accepted": "s-Pass"}.get(r["Status"], "s-Not")
         out.append(f'<tr><td>{e(r["Nist"])}</td><td>{e(r["Scf"])}</td><td class="{cls}">{e(r["Status"])}</td><td>{e(r["Finding"])}</td></tr>')

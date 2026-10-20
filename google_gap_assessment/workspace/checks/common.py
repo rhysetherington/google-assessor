@@ -13,7 +13,7 @@ from typing import Any, Callable, Optional
 from ...model import ProjectResult, gap_or_pass
 from ...registry import Check, registrar, run_checks  # noqa: F401 - re-exported for the domain modules
 from ..context import WsContext
-from ..policy import judge
+from ..policy import judge, judge_many
 
 Predicate = Callable[[Any], Optional[bool]]
 
@@ -79,3 +79,16 @@ class PolicyRule:
             return policy_result(ctx, tenant, self.id, self.setting, self.ok, self.describe, self.detail)
         run.__doc__ = f"{self.question or self.setting}. {self.detail}"
         return Check(self.id, run)
+
+
+def policy_result_many(ctx: WsContext, tenant: str, finding_id: str, settings: "list[str]", ok: Callable[[dict], Optional[bool]],
+                       describe: Callable[[dict], str], detail: str) -> "list[ProjectResult]":
+    """Judge a question that needs several settings together, at the top-level OU and wherever any of them is overridden."""
+    verdict = judge_many(ctx.policies(), settings, ok)
+    if verdict.unknown:
+        missing = [s for s in settings if ctx.policies().top(s) is None]
+        return [ProjectResult(tenant, finding_id, "NotAssessed", [], f"Google returned no value for {', '.join('settings/' + m for m in missing)}. "
+                              "The tenant's edition may not include it, or the signed-in admin cannot read it.")]
+    if verdict.unreadable_field:
+        return [ProjectResult(tenant, finding_id, "NotAssessed", [], "A setting was returned without the field this check needs.")]
+    return [gap_or_pass(tenant, finding_id, [f"{tenant}: {scope} - {describe(value)}" for scope, value in verdict.bad], detail)]

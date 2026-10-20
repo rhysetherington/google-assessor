@@ -15,21 +15,37 @@ from .model import CONTROL_MAPPING
 OUT = Path(__file__).resolve().parent.parent / "Docs" / "Coverage.md"
 
 
+def _table(controls: "list[dict]", workspace: bool) -> "list[str]":
+    ref_head = "CISA SCuBA" if workspace else "CIS"
+    lines = ["", f"| ID | Check | Severity | {ref_head} | NIST CSF 2.0 | SCF |", "|---|---|---|---|---|---|"]
+    for c in controls:
+        refs = c.get("scuba") if workspace else c.get("cis")
+        shown = ", ".join(r.removeprefix("GWS.").removesuffix("v1") for r in refs) if refs else "-"
+        lines.append(f"| {c['id']} | {c['name']} | {c['severity']} | {shown} | {c['nistCsf']} | {c['scf']} |")
+    return lines
+
+
 def render() -> str:
     controls = sorted(CONTROL_MAPPING.values(), key=lambda c: c["id"])
     lines = ["# Coverage", "",
-             f"Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. {len(controls)} checks.", "",
-             "CIS numbers refer to the CIS Google Cloud Platform Foundation Benchmark (v3.0.0 numbering) and appear only where a check tests the same setting. "
-             "Confirm them against the edition you hold; the benchmark is renumbered between releases."]
-    for domain, group in groupby(sorted(controls, key=lambda c: (c["domain"], c["id"])), key=lambda c: c["domain"]):
-        lines += ["", f"## {domain}", "", "| ID | Check | Severity | CIS | NIST CSF 2.0 | SCF |", "|---|---|---|---|---|---|"]
-        for c in group:
-            lines.append(f"| {c['id']} | {c['name']} | {c['severity']} | {', '.join(c['cis']) if c['cis'] else '-'} | {c['nistCsf']} | {c['scf']} |")
-    lines += ["", "## Not covered yet", "",
-              "- Inherited settings: IAM policies, audit configuration and log sinks set on a folder or the organisation are not visible from a project.",
-              "- BigQuery dataset access, GKE cluster hardening, Cloud Functions / Cloud Run exposure, VPC Service Controls, Security Command Center findings, "
-              "and the CIS log-metric alert recommendations (2.4 to 2.11).",
-              "- Cloud KMS is scanned only in the locations passed with `--kms-location` (default `global`)."]
+             f"Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. {len(controls)} checks.", ""]
+    for source, title, note in (
+            ("workspace", "Google Workspace", "SCuBA references are the CISA Secure Cloud Business Applications baseline policies each check covers (`COMMONCONTROLS.5.2` is "
+             "`GWS.COMMONCONTROLS.5.2v1`); a check with `-` is an addition of our own."),
+            ("cloud", "Google Cloud", "CIS numbers refer to the CIS Google Cloud Platform Foundation Benchmark (v3.0.0 numbering) and appear only where a check tests the "
+             "same setting. Confirm them against the edition you hold; the benchmark is renumbered between releases.")):
+        group = [c for c in controls if c.get("source", "cloud") == source]
+        if not group:
+            continue
+        lines += [f"## {title} ({len(group)} checks)", "", note]
+        for domain, items in groupby(sorted(group, key=lambda c: (c["domain"], c["id"])), key=lambda c: c["domain"]):
+            lines += ["", f"### {domain}"] + _table(list(items), source == "workspace")
+        lines.append("")
+    lines += ["## Not covered yet", "",
+              "- Google Cloud: IAM policies, audit configuration and log sinks set on a folder or the organisation are not visible from a project.",
+              "- Google Cloud: BigQuery dataset access, GKE cluster hardening, Cloud Functions / Cloud Run exposure, VPC Service Controls, Security Command Center "
+              "findings, and the CIS log-metric alert recommendations (2.4 to 2.11).",
+              "- Google Cloud: Cloud KMS is scanned only in the locations passed with `--kms-location` (default `global`)."]
     return "\n".join(lines) + "\n"
 
 
