@@ -139,10 +139,12 @@ check is judged at the top-level OU **and** wherever an OU or group overrides it
 ## Status and limits
 
 **The Google Cloud checks have been run against one live (empty) project. The Google Workspace checks have not yet been run against a live
-tenant**; they are verified only against a fake tenant built from the documented API shapes. Setting field names come from CISA's reference
-implementation and its published test data and could differ from what your tenant returns. A field that does not match shows up as
-*NotAssessed* rather than a wrong answer, but expect first-run tuning. Google's Policy API only returns settings your edition includes, and the
-admin-console settings it exposes are a subset of everything in the console.
+tenant**; they run against a fake tenant built from the documented API shapes. Their setting and field names come from CISA's reference
+implementation, which is used on live tenants. In addition, 10 of the 79 admin-console rule checks have been confirmed against real Policy API
+responses (CISA's published test data, no mismatches), and the reducer that turns Google's per-OU and per-group policies into one value is
+checked against that data's expected results. For the rest, a field that does not match your tenant shows up as *NotAssessed* rather than a
+wrong answer, but expect first-run tuning. Google's Policy API only returns settings your edition includes, and the admin-console settings it
+exposes are a subset of everything in the console.
 
 Treat the output as a review aid, not an audit: the checks follow published guidance, some only approximate a recommendation, and a pass means
 the setting that was read looks right, not that the tenant is secure. CIS numbers follow v3.0.0 and should be confirmed against the edition you

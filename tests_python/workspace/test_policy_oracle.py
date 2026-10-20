@@ -8,6 +8,8 @@ import json
 import unittest
 from pathlib import Path
 
+from tests_python.workspace.ws_fakes import Tenant
+
 from google_gap_assessment.workspace.policy import reduce_policies
 
 DATA = Path(__file__).parent.parent / "data" / "policy_api"
@@ -69,6 +71,48 @@ class AgainstRealResponses(unittest.TestCase):
         ours = reduced_by_us(fixture)
         self.assertTrue(any("(group " in label for label in ours), "group-targeted policies should have their own scope")
         self.assertIn("1-1-1-1 (in 1/1-1/1-1-1)", ours)
+
+
+def rules_checked_against_real_data() -> "tuple[int, int, list[str]]":
+    """(settings rules that evaluated a setting present in a real response, all settings rules, rules whose field was not understood).
+
+    A rule is "verified" when the real response contains the setting it reads and the rule produced a Pass or a Gap: that means the field
+    names it uses exist in real data. A rule that finds its setting but reports "cannot interpret" has a wrong field name.
+    """
+    from google_gap_assessment.workspace.checks import calendar, chat, classroom, drive, gmail, groups, identity, meet, sites
+    rules = [r for m in (identity, gmail, drive, groups, meet, calendar, chat, classroom, sites) for r in m.RULES]
+    verified, wrong = set(), []
+    for path in sorted(DATA.glob("scuba_policy_response_*.json")):
+        fixture = json.loads(path.read_text())
+        pages = fixture.get("responses") or [fixture["response"]]
+        raw = [p for page in pages for p in page.get("policies", [])]
+        present = {p["setting"]["type"].removeprefix("settings/") for p in raw}
+        tenant = Tenant()
+        ctx = tenant.context()
+        ctx.client.routes["https://cloudidentity.googleapis.com/v1/policies"] = {"policies": raw}
+        ctx.client.routes["https://admin.googleapis.com/admin/directory/v1/customer/my_customer/orgunits"] = {
+            "organizationUnits": [{"name": v["name"], "orgUnitPath": v["path"], "orgUnitId": "id:" + k} for k, v in fixture["orgunits"].items()]}
+        for rule in rules:
+            if rule.setting not in present:
+                continue
+            result = rule.as_check().run(ctx, "contoso.com")[0]
+            if "can interpret" in result.detail:
+                wrong.append(f"{rule.id} ({path.name})")
+            elif result.status in ("Pass", "Gap"):
+                verified.add(rule.id)
+    return len(verified), len(rules), wrong
+
+
+class FieldNamesAgainstRealData(unittest.TestCase):
+    def test_no_rule_misreads_a_setting_that_real_data_contains(self):
+        verified, total, wrong = rules_checked_against_real_data()
+        self.assertEqual([], wrong, "these rules found their setting in a real response but could not read the field they need")
+        self.assertGreaterEqual(verified, 10)  # the published responses contain a limited set of settings
+
+    def test_the_readme_states_how_many_rules_were_checked_against_real_data(self):
+        verified, total, _ = rules_checked_against_real_data()
+        readme = (Path(__file__).parent.parent.parent / "README.md").read_text()
+        self.assertIn(f"{verified} of the {total} admin-console rule checks", readme)
 
 
 if __name__ == "__main__":
