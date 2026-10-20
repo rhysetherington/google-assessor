@@ -1,6 +1,8 @@
 """A whole run against the fake gcloud: scope, metadata, every domain, scoring, accepted risks and the files that come out,
 including hostile resource names to prove reports cannot become markup or spreadsheet formulas."""
 
+import contextlib
+import io
 import json
 import re
 import stat
@@ -9,13 +11,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from gcp_gap_assessment import coverage
-from gcp_gap_assessment.__main__ import main
-from gcp_gap_assessment.assess import export_assessment, run_assessment
-from gcp_gap_assessment.model import CONTROL_MAPPING
+from google_gap_assessment import coverage
+from google_gap_assessment.__main__ import main
+from google_gap_assessment.assess import export_assessment, run_assessment
+from google_gap_assessment.model import CONTROL_MAPPING
 from tests_python.fakes import DENIED, PROJECT, Err, FakeGcloud, add_binding, healthy
 
-PKG = Path(__file__).parent.parent / "gcp_gap_assessment"
+PKG = Path(__file__).parent.parent / "google_gap_assessment"
 
 
 def run(mutate=None, **kw):
@@ -122,7 +124,7 @@ class Reports(unittest.TestCase):
         self.assertIn("evidence/IAM-003.csv", md)
 
     def test_evidence_files_are_written_and_formula_values_are_neutralised(self):
-        from gcp_gap_assessment.evidence import safe_csv_value
+        from google_gap_assessment.evidence import safe_csv_value
         self.assertTrue((self.folder / "evidence" / "IAM-003.csv").exists())
         self.assertTrue((self.folder / "evidence" / "_index.csv").exists())
         # Affected items start with the project ID today, so also prove the sanitiser directly: a leading = + - @ or tab is defused.
@@ -150,10 +152,10 @@ class Mapping(unittest.TestCase):
     def test_every_control_is_complete_sorted_and_used_by_a_collector(self):
         ids = list(CONTROL_MAPPING)
         self.assertEqual(sorted(ids), ids)
-        code = "\n".join(p.read_text() for p in (PKG / "checks").glob("*.py"))
+        code = "\n".join(p.read_text() for p in list((PKG / "cloud" / "checks").glob("*.py")) + list((PKG / "workspace" / "checks").glob("*.py")))
         for cid, c in CONTROL_MAPPING.items():
             with self.subTest(cid):
-                self.assertRegex(cid, r"^(IAM|LOG|NET|CMP|STO|SQL|KMS|ORG)-\d{3}$")
+                self.assertRegex(cid, r"^[A-Z]{3}-\d{3}$")
                 self.assertIn(c["severity"], ("Critical", "High", "Medium", "Low"))
                 self.assertRegex(c["scf"], r"^[A-Z]{3}-\d{2}$")
                 self.assertRegex(c["nistCsf"], r"^(GV|ID|PR|DE|RS|RC)\.[A-Z]{2}-\d{2}$")
@@ -163,8 +165,8 @@ class Mapping(unittest.TestCase):
                 self.assertIn(f'"{cid}"', code, f"{cid} is not produced by any collector")
 
     def test_every_id_used_in_code_has_a_mapping_entry(self):
-        code = "\n".join(p.read_text() for p in (PKG / "checks").glob("*.py"))
-        used = set(re.findall(r'"((?:IAM|LOG|NET|CMP|STO|SQL|KMS|ORG)-\d{3})"', code))
+        code = "\n".join(p.read_text() for p in list((PKG / "cloud" / "checks").glob("*.py")) + list((PKG / "workspace" / "checks").glob("*.py")))
+        used = set(re.findall(r'"([A-Z]{3}-\d{3})"', code))
         self.assertEqual(set(), used - set(CONTROL_MAPPING))
 
 
@@ -172,8 +174,16 @@ class Docs(unittest.TestCase):
     def test_coverage_page_is_up_to_date(self):
         self.assertEqual(0, coverage.main(["--check"]))
 
-    def test_readme_states_the_real_number_of_checks(self):
-        self.assertIn(f"**{len(CONTROL_MAPPING)} checks**", (PKG.parent / "README.md").read_text())
+    def test_readme_headline_numbers_match_the_data(self):
+        readme = (PKG.parent / "README.md").read_text()
+        ws = sum(1 for c in CONTROL_MAPPING.values() if c["source"] == "workspace")
+        cloud = len(CONTROL_MAPPING) - ws
+        index = json.loads((PKG / "data" / "scuba_policies.json").read_text())
+        covered = {ref.removesuffix("v1") for c in CONTROL_MAPPING.values() for ref in c.get("scuba", [])}
+        for expected in (f"**{len(CONTROL_MAPPING)} checks**", f"**Google Workspace** ({ws} checks)", f"**Google Cloud** ({cloud} checks)",
+                         f"**{len(covered)} of the {len(index['policies'])} are covered**", f"the other {len(index['not_covered'])} are listed"):
+            with self.subTest(expected):
+                self.assertIn(expected, readme)
 
     def test_no_secret_looking_content_in_the_repository(self):
         pattern = re.compile(r"BEGIN (RSA |EC )?PRIVATE KEY|\"private_key\"\s*:|ya29\.[0-9A-Za-z_-]{20,}|AIza[0-9A-Za-z_-]{30,}")
@@ -182,9 +192,33 @@ class Docs(unittest.TestCase):
                 self.assertIsNone(pattern.search(path.read_text(errors="ignore")), str(path))
 
 
+class ScubaIndex(unittest.TestCase):
+    def setUp(self):
+        self.index = json.loads((PKG / "data" / "scuba_policies.json").read_text())
+        self.covered = {ref.removesuffix("v1") for c in CONTROL_MAPPING.values() for ref in c.get("scuba", [])}
+
+    def test_every_scuba_reference_in_the_mapping_is_a_real_policy(self):
+        self.assertEqual(set(), self.covered - set(self.index["policies"]))
+        for c in CONTROL_MAPPING.values():
+            for ref in c.get("scuba", []):
+                self.assertRegex(ref, r"^GWS\.[A-Z]+\.\d+\.\d+v1$")
+
+    def test_every_policy_is_either_covered_or_has_a_recorded_reason(self):
+        self.assertEqual(set(self.index["policies"]) - self.covered, set(self.index["not_covered"]))
+        for pid, info in self.index["not_covered"].items():
+            with self.subTest(pid):
+                self.assertIn(info["reason"], self.index["reasons"])
+                self.assertTrue(info["note"].strip())
+
+    def test_scuba_references_appear_only_on_workspace_checks(self):
+        for c in CONTROL_MAPPING.values():
+            if c.get("scuba"):
+                self.assertEqual("workspace", c["source"], c["id"])
+
+
 class Cli(unittest.TestCase):
     def test_cli_runs_end_to_end_and_writes_reports(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory() as d, contextlib.redirect_stdout(io.StringIO()):
             code = main(["--project-id", PROJECT, "--no-prompt", "--export-path", d, "--client-name", "Cli Test", "--assessment-date", "2026-10-18",
                          "--format", "JSON", "Markdown"], gcloud=FakeGcloud(healthy()))
             self.assertEqual(0, code)

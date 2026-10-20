@@ -1,0 +1,2445 @@
+{
+  "version": "1.0.0",
+  "notes": "CIS Google Cloud Platform Foundation Benchmark recommendation numbers ('cis') are mapped only where a check clearly tests the same setting; unmapped checks have no CIS equivalent. Numbers follow v3.0.0 and should be confirmed against the edition you hold, as the benchmark is renumbered between releases. SCF control IDs and NIST CSF 2.0 subcategories are best-fit mappings; validate against the SCF release your client uses. Finding IDs are never reused or renumbered: retiredIds lists numbers that were reserved but never shipped. Google Workspace checks carry a \"scuba\" list: the CISA SCuBA baseline policy ids (GWS.<PRODUCT>.<n>.<n>vN) each check covers or relates to; checks without one are additions of our own.",
+  "retiredIds": [],
+  "controls": [
+    {
+      "id": "CMP-001",
+      "domain": "Compute Engine",
+      "name": "Instances use the default Compute Engine service account",
+      "severity": "Medium",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "4.1"
+      ],
+      "remediation": [
+        "Create a dedicated service account per workload and recreate or reconfigure the instance to use it (stop the instance to change its service account)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "CMP-002",
+      "domain": "Compute Engine",
+      "name": "Default service account with full access to all Cloud APIs",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "4.2"
+      ],
+      "remediation": [
+        "Use a dedicated service account with only the required IAM roles.",
+        "Where the default account must stay, replace the cloud-platform scope with only the scopes the workload needs."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "CMP-003",
+      "domain": "Compute Engine",
+      "name": "Instances accept project-wide SSH keys",
+      "severity": "Medium",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "4.3"
+      ],
+      "remediation": [
+        "Set metadata block-project-ssh-keys=TRUE on the instance, or switch to OS Login (CMP-004)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "CMP-004",
+      "domain": "Compute Engine",
+      "name": "OS Login not enabled",
+      "severity": "Medium",
+      "scf": "IAC-02",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "4.4"
+      ],
+      "remediation": [
+        "Set project metadata enable-oslogin=TRUE (Compute Engine > Metadata) and remove instance-level overrides set to FALSE.",
+        "Enforce compute.requireOsLogin (ORG-003)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "CMP-005",
+      "domain": "Compute Engine",
+      "name": "Serial port access enabled",
+      "severity": "Medium",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [
+        "4.5"
+      ],
+      "remediation": [
+        "Remove or set to FALSE the serial-port-enable metadata on the project and instances.",
+        "Enforce compute.disableSerialPortAccess (ORG-008)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "CMP-006",
+      "domain": "Compute Engine",
+      "name": "IP forwarding enabled on instances",
+      "severity": "Medium",
+      "scf": "NET-01",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "4.6"
+      ],
+      "remediation": [
+        "IP forwarding can only be changed at creation: recreate the instance with it off unless it is a router or appliance."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "CMP-007",
+      "domain": "Compute Engine",
+      "name": "Shielded VM vTPM or integrity monitoring off",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [
+        "4.8"
+      ],
+      "remediation": [
+        "Stop the instance, Edit > Shielded VM: turn on vTPM and Integrity monitoring (and Secure Boot where the image supports it)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "CMP-008",
+      "domain": "Compute Engine",
+      "name": "Instances have external IP addresses",
+      "severity": "Medium",
+      "scf": "NET-03",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "4.9"
+      ],
+      "remediation": [
+        "Remove the external IP (Edit > Network interfaces > External IPv4: None) and use Cloud NAT, IAP or a load balancer for access.",
+        "Enforce compute.vmExternalIpAccess (ORG-004)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "GCH-001",
+      "domain": "Workspace: Chat",
+      "name": "Chat history is not on by default",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > History for chats: set \"Chat conversations are saved by default\" / \"History is on\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.1.1v1"
+      ]
+    },
+    {
+      "id": "GCH-002",
+      "domain": "Workspace: Chat",
+      "name": "Users can change their chat history setting",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > History for chats: untick \"Allow users to change their history setting\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.1.2v1"
+      ]
+    },
+    {
+      "id": "GCH-003",
+      "domain": "Workspace: Chat",
+      "name": "Files can be shared with people outside the organisation in Chat",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > Chat file sharing: set \"External filesharing\" to \"No files\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.2.1v1"
+      ]
+    },
+    {
+      "id": "GCH-004",
+      "domain": "Workspace: Chat",
+      "name": "Space history is not always on",
+      "severity": "Low",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > Space history: choose \"Always on\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.3.1v1"
+      ]
+    },
+    {
+      "id": "GCH-005",
+      "domain": "Workspace: Chat",
+      "name": "External chat is not limited to allowlisted domains",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > External chat settings: turn external chat off, or tick \"Allow users to send messages to external users\" and \"Only allow this for allowlisted domains\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.4.1v1"
+      ]
+    },
+    {
+      "id": "GCL-001",
+      "domain": "Workspace: Calendar",
+      "name": "Primary calendars show outsiders more than free/busy",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Sharing settings > External sharing options for primary calendars: choose \"Only free/busy information (hide event details)\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.1.1v1"
+      ]
+    },
+    {
+      "id": "GCL-002",
+      "domain": "Workspace: Calendar",
+      "name": "Secondary calendars show outsiders more than free/busy",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Sharing settings > External sharing options for secondary calendars: choose \"Only free/busy information (hide event details)\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.1.2v1"
+      ]
+    },
+    {
+      "id": "GCL-003",
+      "domain": "Workspace: Calendar",
+      "name": "Users are not warned when inviting people outside the organisation",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Sharing settings > External invitations: tick \"Warn users when inviting guests outside of the domain\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.2.1v1"
+      ]
+    },
+    {
+      "id": "GCL-004",
+      "domain": "Workspace: Calendar",
+      "name": "Calendar interoperability is enabled",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Advanced settings > Calendar interop: untick \"Enable Calendar Interop\" unless a migration needs it, and use Graph API authentication when it does."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.3.1v1"
+      ]
+    },
+    {
+      "id": "GCL-005",
+      "domain": "Workspace: Calendar",
+      "name": "Appointment schedules can take payments",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Advanced settings > Appointment schedules: untick \"Allow appointment schedules with payments\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.4.1v1"
+      ]
+    },
+    {
+      "id": "GCR-001",
+      "domain": "Workspace: Classroom",
+      "name": "Outsiders can join classes",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Class membership: set \"Who can join classes in your domain\" to \"Users in your domain only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.1.1v1"
+      ]
+    },
+    {
+      "id": "GCR-002",
+      "domain": "Workspace: Classroom",
+      "name": "Users can join classes run by other organisations",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Class membership: set \"Which classes can users in your domain join\" to \"Classes in your domain only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.1.2v1"
+      ]
+    },
+    {
+      "id": "GCR-003",
+      "domain": "Workspace: Classroom",
+      "name": "Users can authorise apps to access Classroom data",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Data access: untick \"Allow users to authorize apps to access Classroom data\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.2.1v1"
+      ]
+    },
+    {
+      "id": "GCR-004",
+      "domain": "Workspace: Classroom",
+      "name": "Roster import is enabled",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Roster import: choose \"Off\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.3.1v1"
+      ]
+    },
+    {
+      "id": "GCR-005",
+      "domain": "Workspace: Classroom",
+      "name": "Students can unenrol other students",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Student unenrollment: choose \"Only teachers\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.4.1v1"
+      ]
+    },
+    {
+      "id": "GCR-006",
+      "domain": "Workspace: Classroom",
+      "name": "Anyone can create classes",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Teacher permissions: choose \"Verified teachers only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.5.1v1"
+      ]
+    },
+    {
+      "id": "GDR-001",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Files can be shared with anyone outside the organisation",
+      "severity": "High",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Sharing options: set \"Sharing outside of <org>\" to \"OFF\" or \"ALLOWLISTED DOMAINS\" and manage the allowlist."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.1v1"
+      ]
+    },
+    {
+      "id": "GDR-002",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users can receive files from outside the sharing boundary",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: untick \"Allow users in <org> to receive files from users or shared drives outside of <org>\" (or the allowlisted-domains equivalent)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.2v1"
+      ]
+    },
+    {
+      "id": "GDR-003",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users are not warned before sharing outside the organisation",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: tick \"When sharing outside of <org> is allowed, users in <org> see a warning prompt\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.3v1"
+      ]
+    },
+    {
+      "id": "GDR-004",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users can invite people without Google accounts",
+      "severity": "Medium",
+      "scf": "IAC-02",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: untick \"Allow users to invite people outside <org> who are not using a Google account to view files\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.4v1"
+      ]
+    },
+    {
+      "id": "GDR-005",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users can publish files to the web",
+      "severity": "High",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: untick \"When sharing outside of <org> is allowed, users can publish files on the web or make visible to the world as public or unlisted\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.5v1"
+      ]
+    },
+    {
+      "id": "GDR-006",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Access-checker suggestions offer wider audiences than the recipients",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Access Checker: choose \"Recipients only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.6v1"
+      ]
+    },
+    {
+      "id": "GDR-007",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Content can be distributed to shared drives outside the organisation",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Distributing content outside of <org>: choose \"None\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.7v1"
+      ]
+    },
+    {
+      "id": "GDR-008",
+      "domain": "Workspace: Drive and Docs",
+      "name": "New files are shared by link by default",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > General access default: choose \"Private to the owner\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.8v1"
+      ]
+    },
+    {
+      "id": "GDR-009",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Files from outside the organisation are not highlighted",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Warning for external files: tick \"Highlight files that come from outside <org>\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.9v1"
+      ]
+    },
+    {
+      "id": "GDR-010",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Shared drive managers can override sharing settings",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Shared drive creation: untick \"Allow members with manager access to override the settings below\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.2.1v1"
+      ]
+    },
+    {
+      "id": "GDR-011",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Shared drives can be shared with people outside the organisation",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Shared drive creation: untick \"Allow people outside <org> to access files in shared drives\"."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GDR-012",
+      "domain": "Workspace: Drive and Docs",
+      "name": "The Drive link-security update is not applied or users can remove it",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Security update for shared links: choose \"Apply security update to all impacted files\" and untick \"Allow users to remove/apply the security update\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.3.1v1"
+      ]
+    },
+    {
+      "id": "GDR-013",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Drive SDK access is enabled",
+      "severity": "Medium",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Features and Applications: untick \"Allow users to access Google Drive with the Drive SDK API\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.4.1v1"
+      ]
+    },
+    {
+      "id": "GDR-014",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Drive for desktop is not limited to authorised devices",
+      "severity": "Medium",
+      "scf": "END-01",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Features and Applications > Drive for desktop: tick \"Only allow Google Drive for desktop on authorized devices\" (or turn Drive for desktop off)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.5.1v1"
+      ]
+    },
+    {
+      "id": "GGR-001",
+      "domain": "Workspace: Groups",
+      "name": "Groups can be accessed from outside the organisation",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings > Accessing groups from outside this organization: turn it off (owners can then opt individual groups in)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.1.1v1"
+      ]
+    },
+    {
+      "id": "GGR-002",
+      "domain": "Workspace: Groups",
+      "name": "Group owners can add external members",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings: untick \"Group owners can allow members outside your domain\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.1.2v1"
+      ]
+    },
+    {
+      "id": "GGR-003",
+      "domain": "Workspace: Groups",
+      "name": "Group owners can let the public post to a group",
+      "severity": "Low",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings: untick \"Group owners can allow incoming email from outside the organization\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.1.3v1"
+      ]
+    },
+    {
+      "id": "GGR-004",
+      "domain": "Workspace: Groups",
+      "name": "Anyone in the organisation can create groups",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings > Creating groups: choose \"Only organization admins can create groups\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.2.1v1"
+      ]
+    },
+    {
+      "id": "GGR-005",
+      "domain": "Workspace: Groups",
+      "name": "Conversations are visible to more than group members by default",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings > Default for permission to view conversations: choose \"Group members\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.3.1v1"
+      ]
+    },
+    {
+      "id": "GGR-006",
+      "domain": "Workspace: Groups",
+      "name": "Groups can be hidden from the directory",
+      "severity": "Low",
+      "scf": "AST-02",
+      "nistCsf": "ID.AM-02",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings: untick \"Group owners can hide groups from the Groups list\" and \"New groups are hidden from the Groups list by default\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.4.1v1"
+      ]
+    },
+    {
+      "id": "GID-001",
+      "domain": "Workspace: Identity and access",
+      "name": "2-step verification is not enforced",
+      "severity": "Critical",
+      "scf": "IAC-06",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > 2-step verification: allow users to turn on 2SV, set Enforcement to \"On\" with a start date in the past.",
+        "Apply it to the top-level organisational unit so every OU inherits it."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.1.2v1"
+      ]
+    },
+    {
+      "id": "GID-002",
+      "domain": "Workspace: Identity and access",
+      "name": "Second factor is not phishing-resistant (passkeys / security keys only)",
+      "severity": "High",
+      "scf": "IAC-06",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > 2-step verification > Methods: select \"Only security key\" (passkeys and security keys).",
+        "Enrol every user with a key or passkey first, and keep a documented break-glass process."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.1.1v1",
+        "GWS.COMMONCONTROLS.1.3v1"
+      ]
+    },
+    {
+      "id": "GID-003",
+      "domain": "Workspace: Identity and access",
+      "name": "New users have no, or too long, an enrolment window for 2-step verification",
+      "severity": "Medium",
+      "scf": "IAC-06",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > 2-step verification > New user enrollment period: set it to 1 week or less (not \"None\")."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.1.4v1"
+      ]
+    },
+    {
+      "id": "GID-004",
+      "domain": "Workspace: Identity and access",
+      "name": "Users can trust a device to skip 2-step verification",
+      "severity": "Medium",
+      "scf": "IAC-06",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > 2-step verification > Frequency: turn off \"Allow user to trust the device\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.1.5v1"
+      ]
+    },
+    {
+      "id": "GID-005",
+      "domain": "Workspace: Identity and access",
+      "name": "Active users are not enrolled in 2-step verification",
+      "severity": "High",
+      "scf": "IAC-06",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Reporting > User reports > Security, or Directory > Users filtered by 2-step verification, to list them.",
+        "Contact each user, then enforce 2SV (GID-001) so the remainder are forced to enrol."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GID-006",
+      "domain": "Workspace: Identity and access",
+      "name": "Web sessions last longer than 12 hours",
+      "severity": "Medium",
+      "scf": "IAC-25",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Access and data control > Google session control: set Web session duration to 12 hours or less."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.4.1v1"
+      ]
+    },
+    {
+      "id": "GID-007",
+      "domain": "Workspace: Identity and access",
+      "name": "Password strength is not enforced as Strong",
+      "severity": "Medium",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Password management: tick \"Enforce strong password\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.5.1v1"
+      ]
+    },
+    {
+      "id": "GID-008",
+      "domain": "Workspace: Identity and access",
+      "name": "Minimum password length is below 12",
+      "severity": "Medium",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Password management: set Minimum length to at least 12."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.5.2v1"
+      ]
+    },
+    {
+      "id": "GID-009",
+      "domain": "Workspace: Identity and access",
+      "name": "Minimum password length is below 16 (recommended)",
+      "severity": "Low",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Password management: set Minimum length to 16 or more."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.5.3v1"
+      ]
+    },
+    {
+      "id": "GID-010",
+      "domain": "Workspace: Identity and access",
+      "name": "Password requirements are not enforced at the next sign-in",
+      "severity": "Medium",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Password management: tick \"Enforce password policy at next sign-in\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.5.4v1"
+      ]
+    },
+    {
+      "id": "GID-011",
+      "domain": "Workspace: Identity and access",
+      "name": "Users can reuse passwords",
+      "severity": "Low",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Password management: untick \"Allow password reuse\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.5.5v1"
+      ]
+    },
+    {
+      "id": "GID-012",
+      "domain": "Workspace: Identity and access",
+      "name": "Passwords expire on a schedule",
+      "severity": "Low",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Password management: set Password reset to \"Never expires\" (rely on 2SV and breach monitoring instead)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.5.6v1"
+      ]
+    },
+    {
+      "id": "GID-013",
+      "domain": "Workspace: Identity and access",
+      "name": "Too few or too many super admin accounts",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Account > Admin roles > Super Admin: review who holds it.",
+        "Keep between two and eight named, individual super admin accounts; remove or downgrade the rest to delegated roles."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.6.2v1"
+      ]
+    },
+    {
+      "id": "GID-014",
+      "domain": "Workspace: Identity and access",
+      "name": "Super admins sign in through an external identity provider",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > SSO with third party IdP: assign \"SSO off\" (sign in with Google) to the OU that holds the super admin accounts.",
+        "Keep super admins in a dedicated OU so that is easy to scope."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.6.1v1"
+      ]
+    },
+    {
+      "id": "GID-015",
+      "domain": "Workspace: Identity and access",
+      "name": "Administrator accounts are not enrolled in 2-step verification",
+      "severity": "Critical",
+      "scf": "IAC-06",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Directory > Users, filter on administrator accounts, and enrol each in 2SV with a security key.",
+        "Enforce 2SV for the admin OU immediately rather than waiting for the organisation-wide date."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GID-016",
+      "domain": "Workspace: Identity and access",
+      "name": "Accounts that have not signed in for a long time are still active",
+      "severity": "Medium",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Reporting > User reports > Accounts, or Directory > Users sorted by last sign-in.",
+        "Suspend, then archive or delete, accounts that are no longer needed."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GID-017",
+      "domain": "Workspace: Identity and access",
+      "name": "Conflicting unmanaged accounts are preserved, not replaced",
+      "severity": "Medium",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Account > Account settings > Conflicting accounts: choose \"Replace the conflicting account\" and communicate it to users."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.7.1v1"
+      ]
+    },
+    {
+      "id": "GID-018",
+      "domain": "Workspace: Identity and access",
+      "name": "Super admins can recover their own accounts by self-service",
+      "severity": "Medium",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Account recovery: turn off self-service recovery for super admins."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.8.1v1"
+      ]
+    },
+    {
+      "id": "GID-019",
+      "domain": "Workspace: Identity and access",
+      "name": "Users can recover their own accounts by self-service",
+      "severity": "Low",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Authentication > Account recovery: turn off \"Allow users to recover their own account\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.8.2v1"
+      ]
+    },
+    {
+      "id": "GID-020",
+      "domain": "Workspace: Identity and access",
+      "name": "Third-party app access to Google services is not restricted",
+      "severity": "High",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Access and data control > API controls > Manage Google services: set every listed service to Restricted."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.10.1v1"
+      ]
+    },
+    {
+      "id": "GID-021",
+      "domain": "Workspace: Identity and access",
+      "name": "Only high-risk scopes are restricted for Drive, Gmail, Classroom or Chat",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > API controls > Manage Google services: restrict All scopes (not only \"High-risk\") for Drive, Gmail, Classroom and Chat."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.10.2v1"
+      ]
+    },
+    {
+      "id": "GID-022",
+      "domain": "Workspace: Identity and access",
+      "name": "Internal apps are trusted automatically",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > API controls > Settings: turn off \"Trust internal, domain-owned apps\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.10.3v1"
+      ]
+    },
+    {
+      "id": "GID-023",
+      "domain": "Workspace: Identity and access",
+      "name": "Users can access unreviewed third-party apps",
+      "severity": "High",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > API controls > Settings > Unconfigured third-party apps: choose \"Don't allow users to access any third-party apps\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.10.4v1"
+      ]
+    },
+    {
+      "id": "GID-024",
+      "domain": "Workspace: Identity and access",
+      "name": "Less secure app access is allowed",
+      "severity": "High",
+      "scf": "IAC-02",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Less secure apps: choose \"Disable access to less secure apps (Recommended)\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.10.5v1"
+      ]
+    },
+    {
+      "id": "GID-025",
+      "domain": "Workspace: Identity and access",
+      "name": "Marketplace apps are not restricted to an approved list",
+      "severity": "Medium",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace Marketplace apps > Settings: allow only allowlisted apps (or none), and untick \"Allow users to install all internal apps\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.11.1v1"
+      ]
+    },
+    {
+      "id": "GID-026",
+      "domain": "Workspace: Identity and access",
+      "name": "Google Takeout is enabled for users",
+      "severity": "Medium",
+      "scf": "DCH-06",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Account > Google Takeout (or Apps > Additional Google services > Google Takeout): turn the service off for users."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.12.1v1"
+      ]
+    },
+    {
+      "id": "GID-027",
+      "domain": "Workspace: Identity and access",
+      "name": "Some system-defined alert rules are switched off",
+      "severity": "Medium",
+      "scf": "MON-01",
+      "nistCsf": "DE.CM-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Alert center > Alert rules (system defined): turn each alert On and make sure someone receives its notifications."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.13.1v1"
+      ]
+    },
+    {
+      "id": "GID-028",
+      "domain": "Workspace: Identity and access",
+      "name": "Data at rest region is not pinned",
+      "severity": "Low",
+      "scf": "DCH-01",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Account > Account settings > Legal and compliance > Data regions: choose a region for your organisation (needs an eligible edition)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.15.1v1"
+      ]
+    },
+    {
+      "id": "GID-029",
+      "domain": "Workspace: Identity and access",
+      "name": "Data is not processed only in its storage region",
+      "severity": "Low",
+      "scf": "DCH-01",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Account > Account settings > Legal and compliance > Data regions: tick \"Limit data processing to the storage region\" where available."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.15.2v1"
+      ]
+    },
+    {
+      "id": "GID-030",
+      "domain": "Workspace: Identity and access",
+      "name": "Multi-party approval is not enabled for sensitive admin changes",
+      "severity": "Medium",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Multi-party approval: turn it on for sensitive settings such as disabling 2-step verification."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.17.1v1"
+      ]
+    },
+    {
+      "id": "GID-031",
+      "domain": "Workspace: Identity and access",
+      "name": "No active data-loss-prevention rules",
+      "severity": "Medium",
+      "scf": "DCH-01",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Security > Access and data control > Data protection > Manage rules: create rules for sensitive data (card numbers, national IDs) and set them Active."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.COMMONCONTROLS.18.1v1",
+        "GWS.COMMONCONTROLS.18.2v1"
+      ]
+    },
+    {
+      "id": "GML-001",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Mailbox delegation is allowed",
+      "severity": "Medium",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > User settings > Mail delegation: untick \"Let users delegate access to their mailbox to other users in the domain\" (or restrict it to the OUs that need it)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.1.1v1"
+      ]
+    },
+    {
+      "id": "GML-002",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DKIM is not published for every domain",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Authenticate email: select each domain, click Generate new record, publish the TXT record at google._domainkey.<domain>, then click Start authentication."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.2.1v1"
+      ]
+    },
+    {
+      "id": "GML-003",
+      "domain": "Workspace: Gmail and email security",
+      "name": "SPF does not hard-fail unauthorised senders",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Publish exactly one SPF TXT record per domain that ends in -all, for example \"v=spf1 include:_spf.google.com -all\".",
+        "Add the other services that legitimately send as you before tightening to -all."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.3.1v1"
+      ]
+    },
+    {
+      "id": "GML-004",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC is not published for every domain",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Publish a TXT record at _dmarc.<domain>, for example \"v=DMARC1; p=none; rua=mailto:dmarc-reports@<domain>\", and make sure there is only one."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.4.1v1"
+      ]
+    },
+    {
+      "id": "GML-005",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC policy is not reject",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Move the DMARC policy from none to quarantine to reject once the aggregate reports show only legitimate senders failing; set sp=reject for subdomains."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.4.2v1"
+      ]
+    },
+    {
+      "id": "GML-006",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC aggregate reporting is not configured",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "DE.CM-01",
+      "cis": [],
+      "remediation": [
+        "Add rua=mailto:<address> to the DMARC record (and ruf= if you want forensic reports) so you can see who sends mail as your domain."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.4.4v1"
+      ]
+    },
+    {
+      "id": "GML-007",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC applies to only part of the mail",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Remove pct= from the DMARC record, or set pct=100."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GML-008",
+      "domain": "Workspace: Gmail and email security",
+      "name": "MTA-STS is not published",
+      "severity": "Low",
+      "scf": "CRY-03",
+      "nistCsf": "PR.DS-02",
+      "cis": [],
+      "remediation": [
+        "Publish a TXT record at _mta-sts.<domain> (\"v=STSv1; id=<timestamp>\") and host the policy file at https://mta-sts.<domain>/.well-known/mta-sts.txt."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GML-009",
+      "domain": "Workspace: Gmail and email security",
+      "name": "TLS reporting is not published",
+      "severity": "Low",
+      "scf": "CRY-03",
+      "nistCsf": "DE.CM-01",
+      "cis": [],
+      "remediation": [
+        "Publish a TXT record at _smtp._tls.<domain>, for example \"v=TLSRPTv1; rua=mailto:tls-reports@<domain>\"."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GML-010",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against encrypted attachments is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Protect against encrypted attachments from untrusted senders\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.1v1"
+      ]
+    },
+    {
+      "id": "GML-011",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against attachments with scripts is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Protect against attachments with scripts from untrusted senders\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.2v1"
+      ]
+    },
+    {
+      "id": "GML-012",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against anomalous attachment types is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Protect against anomalous attachment types in emails\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.3v1"
+      ]
+    },
+    {
+      "id": "GML-013",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Future recommended attachment protections are not applied automatically",
+      "severity": "Low",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Apply future recommended settings automatically\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.4v1"
+      ]
+    },
+    {
+      "id": "GML-014",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Suspicious attachments stay in the inbox",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: set the action for each protection to \"Move email to spam\" or \"Quarantine\", not \"Keep email in inbox and show warning\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.5v1"
+      ]
+    },
+    {
+      "id": "GML-015",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Links behind shorteners are not scanned",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Identify links behind shortened URLs\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.1v1"
+      ]
+    },
+    {
+      "id": "GML-016",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Images from external senders are not scanned",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Scan linked images\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.2v1"
+      ]
+    },
+    {
+      "id": "GML-017",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Aggressive warnings on untrusted links are off",
+      "severity": "Low",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Show warning prompt for any click on links to untrusted domains\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.3v1"
+      ]
+    },
+    {
+      "id": "GML-018",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Future link and image protections are not applied automatically",
+      "severity": "Low",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Apply future recommended settings automatically\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.4v1"
+      ]
+    },
+    {
+      "id": "GML-019",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Domain-name spoofing protection is off",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against domain spoofing based on similar domain names\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.1v1"
+      ]
+    },
+    {
+      "id": "GML-020",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Employee-name spoofing protection is off",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against spoofing of employee names\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.2v1"
+      ]
+    },
+    {
+      "id": "GML-021",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against your domain being spoofed is off",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against inbound emails spoofing your domain\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.3v1",
+        "GWS.GMAIL.7.5v1"
+      ]
+    },
+    {
+      "id": "GML-022",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Unauthenticated email is not flagged",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against unauthenticated emails\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.4v1"
+      ]
+    },
+    {
+      "id": "GML-023",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Spoofed email is left in the inbox",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: set each action to \"Move email to spam\" or \"Quarantine\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.6v1"
+      ]
+    },
+    {
+      "id": "GML-024",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Future spoofing protections are not applied automatically",
+      "severity": "Low",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Apply future recommended settings automatically\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.7v1"
+      ]
+    },
+    {
+      "id": "GML-025",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Users can import email from other providers",
+      "severity": "Low",
+      "scf": "NET-12",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > User settings > Email import: untick \"Allow users to import email and contacts from other providers\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.8.1v1"
+      ]
+    },
+    {
+      "id": "GML-026",
+      "domain": "Workspace: Gmail and email security",
+      "name": "POP or IMAP access is enabled",
+      "severity": "High",
+      "scf": "IAC-02",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > End User Access > POP and IMAP access: untick \"Enable POP access\" and \"Enable IMAP access\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.9.1v1"
+      ]
+    },
+    {
+      "id": "GML-027",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Google Workspace Sync for Microsoft Outlook is enabled",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > End User Access > Google Workspace Sync: untick \"Enable Google Workspace Sync for Microsoft Outlook for my users\" unless it is needed."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.10.1v1"
+      ]
+    },
+    {
+      "id": "GML-028",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Users can automatically forward email outside the organisation",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > End User Access > Automatic forwarding: untick \"Allow users to automatically forward incoming email to another address\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.11.1v1"
+      ]
+    },
+    {
+      "id": "GML-029",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Users can send mail through their own SMTP servers",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Hosts / Routing > Allow per-user outbound gateways: untick it."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.12.1v1"
+      ]
+    },
+    {
+      "id": "GML-030",
+      "domain": "Workspace: Gmail and email security",
+      "name": "The spam-filter IP allowlist is not empty",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Email allowlist: remove all IP addresses, and use authenticated partners and DMARC instead."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.14.1v1"
+      ]
+    },
+    {
+      "id": "GML-031",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Enhanced pre-delivery message scanning is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Enhanced pre-delivery message scanning: tick \"Enables improved detection of suspicious content prior to delivery\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.15.1v1"
+      ]
+    },
+    {
+      "id": "GML-032",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Comprehensive mail storage is not enabled",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Compliance > Comprehensive mail storage: add the setting so a copy of all sent and received mail is kept in each user's mailbox."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.17.1v1"
+      ]
+    },
+    {
+      "id": "GML-033",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Spam-filter override (allowlist) rules exist",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Spam: review each override rule and remove senders or domains that do not need to bypass filtering."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.18.1v1",
+        "GWS.GMAIL.18.2v1"
+      ]
+    },
+    {
+      "id": "GML-034",
+      "domain": "Workspace: Gmail and email security",
+      "name": "A rule hides warning banners for all senders on a list",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Spam: untick \"Hide warning banners for all messages from senders in the list\" on each override rule."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.18.3v1"
+      ]
+    },
+    {
+      "id": "GMT-001",
+      "domain": "Workspace: Meet",
+      "name": "Outsiders who were not invited can join meetings without asking",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > Access: set \"Meeting access\" so uninvited external users must ask to join."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.1.1v1"
+      ]
+    },
+    {
+      "id": "GMT-002",
+      "domain": "Workspace: Meet",
+      "name": "Users can join meetings created outside any Workspace organisation",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > Access: choose \"Users can join only meetings created by Workspace organizations\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.2.1v1"
+      ]
+    },
+    {
+      "id": "GMT-003",
+      "domain": "Workspace: Meet",
+      "name": "Host management features are off",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > Host management: tick \"Host management\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.3.1v1"
+      ]
+    },
+    {
+      "id": "GMT-004",
+      "domain": "Workspace: Meet",
+      "name": "External participants are not labelled",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > External participants: tick \"Warn for external participants\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.4.1v1"
+      ]
+    },
+    {
+      "id": "GMT-005",
+      "domain": "Workspace: Meet",
+      "name": "Meetings are recorded automatically",
+      "severity": "Low",
+      "scf": "DCH-01",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet video settings: untick \"Recordings will be automatically on\" (leave recording available to hosts)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.5.1v1"
+      ]
+    },
+    {
+      "id": "GMT-006",
+      "domain": "Workspace: Meet",
+      "name": "Meetings are transcribed automatically",
+      "severity": "Low",
+      "scf": "DCH-01",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet video settings: untick \"Transcripts will be automatically on\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.5.2v1"
+      ]
+    },
+    {
+      "id": "GST-001",
+      "domain": "Workspace: Sites",
+      "name": "Google Sites is enabled for users",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Sites: set the service status to \"OFF for everyone\" if the organisation does not need Sites."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.SITES.1.1v1"
+      ]
+    },
+    {
+      "id": "IAM-001",
+      "domain": "Identity and IAM",
+      "name": "Owner or Editor role granted to users, groups or domains",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find principals with Owner or Editor.",
+        "Replace each with predefined roles that match the job (for example Compute Viewer, Storage Object Admin) or a custom role.",
+        "Keep Owner for a small number of named administrators and review it with IAM Recommender (gcloud recommender recommendations list --recommender=google.iam.policy.Recommender)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-002",
+      "domain": "Identity and IAM",
+      "name": "Service accounts with administrative privileges",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "1.5"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find service accounts holding Owner, Editor or an *admin role.",
+        "Replace them with the narrowest predefined or custom role the workload needs.",
+        "Use IAM Recommender to see which permissions the account actually used."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-003",
+      "domain": "Identity and IAM",
+      "name": "Project IAM policy grants roles to allUsers or allAuthenticatedUsers",
+      "severity": "Critical",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > IAM; remove the allUsers and allAuthenticatedUsers bindings.",
+        "If public access is intended, grant it on the individual resource instead of the project and document the exception.",
+        "Enforce the iam.allowedPolicyMemberDomains organisation policy (ORG-005) so public grants cannot return."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-004",
+      "domain": "Identity and IAM",
+      "name": "User-managed service account keys exist",
+      "severity": "High",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.4"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > Service Accounts > Keys; list the user-managed keys.",
+        "Move workloads to attached service accounts, Workload Identity Federation or short-lived impersonation, then delete the keys.",
+        "Enforce the iam.disableServiceAccountKeyCreation organisation policy (ORG-001)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-005",
+      "domain": "Identity and IAM",
+      "name": "User-managed service account keys not rotated within 90 days",
+      "severity": "High",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.7"
+      ],
+      "remediation": [
+        "Create a replacement key, deploy it, then delete the old key; repeat at least every 90 days.",
+        "Better: remove the need for keys (see IAM-004).",
+        "Use Cloud Asset Inventory or a scheduled job to alert on keys approaching 90 days."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-006",
+      "domain": "Identity and IAM",
+      "name": "Users hold Service Account User or Token Creator at project level",
+      "severity": "Medium",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "1.6"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find roles/iam.serviceAccountUser and roles/iam.serviceAccountTokenCreator.",
+        "Grant the role on the specific service account (Service Accounts > Permissions) rather than on the project."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-007",
+      "domain": "Identity and IAM",
+      "name": "Access granted to non-corporate accounts",
+      "severity": "Medium",
+      "scf": "IAC-15",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.1"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; review principals outside your corporate domains.",
+        "Replace personal accounts with managed identities (Cloud Identity / Google Workspace) or groups.",
+        "Enforce the iam.allowedPolicyMemberDomains organisation policy (ORG-005)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-008",
+      "domain": "Identity and IAM",
+      "name": "Default service accounts hold Editor or Owner",
+      "severity": "High",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Create dedicated service accounts per workload with only the roles they need.",
+        "Remove Editor from the default Compute Engine and App Engine service accounts once nothing depends on it.",
+        "Enforce iam.automaticIamGrantsForDefaultServiceAccounts (ORG-009) so new projects do not grant it."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-009",
+      "domain": "Identity and IAM",
+      "name": "Separation of duties: one principal is Service Account Admin and Service Account User",
+      "severity": "Medium",
+      "scf": "HRS-11",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "1.8"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > IAM; find principals with both roles/iam.serviceAccountAdmin and roles/iam.serviceAccountUser.",
+        "Split the roles between different principals or groups."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-010",
+      "domain": "Identity and IAM",
+      "name": "API keys without restrictions",
+      "severity": "High",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.13",
+        "1.14"
+      ],
+      "remediation": [
+        "Console > APIs & Services > Credentials; open each key and set an application restriction and an API restriction.",
+        "Delete keys that are not needed; prefer OAuth or service account credentials where possible."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "IAM-011",
+      "domain": "Identity and IAM",
+      "name": "API keys older than 90 days",
+      "severity": "Low",
+      "scf": "IAC-10",
+      "nistCsf": "PR.AA-01",
+      "cis": [
+        "1.15"
+      ],
+      "remediation": [
+        "Console > APIs & Services > Credentials; create a replacement key, update the application, delete the old key.",
+        "Repeat at least every 90 days or remove the need for the key."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "KMS-001",
+      "domain": "Cloud KMS",
+      "name": "Cloud KMS keys are publicly accessible",
+      "severity": "Critical",
+      "scf": "CRY-09",
+      "nistCsf": "PR.DS-01",
+      "cis": [
+        "1.9"
+      ],
+      "remediation": [
+        "Console > Security > Key Management > key > Permissions; remove allUsers and allAuthenticatedUsers."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "KMS-002",
+      "domain": "Cloud KMS",
+      "name": "Cloud KMS keys not rotated within 90 days",
+      "severity": "Medium",
+      "scf": "CRY-09",
+      "nistCsf": "PR.DS-01",
+      "cis": [
+        "1.10"
+      ],
+      "remediation": [
+        "Console > Security > Key Management > key > Edit rotation period: set 90 days or less."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "LOG-001",
+      "domain": "Logging and monitoring",
+      "name": "Cloud Audit Logs not fully enabled",
+      "severity": "High",
+      "scf": "MON-03",
+      "nistCsf": "PR.PS-04",
+      "cis": [
+        "2.1"
+      ],
+      "remediation": [
+        "Console > IAM & Admin > Audit Logs; enable Admin Read, Data Read and Data Write for All services and remove exempted principals.",
+        "Or set auditConfigs on the project IAM policy (gcloud projects get-iam-policy / set-iam-policy), ideally at organisation level.",
+        "Data access logs cost money; use log buckets and exclusions deliberately rather than leaving them off."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "LOG-002",
+      "domain": "Logging and monitoring",
+      "name": "No log sink exports all log entries",
+      "severity": "Medium",
+      "scf": "MON-02",
+      "nistCsf": "PR.PS-04",
+      "cis": [
+        "2.2"
+      ],
+      "remediation": [
+        "Console > Logging > Log Router > Create sink with no inclusion filter, to Cloud Storage, BigQuery or Pub/Sub.",
+        "Prefer an aggregated sink on the organisation or a folder (--include-children) so new projects are covered."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "LOG-003",
+      "domain": "Logging and monitoring",
+      "name": "Log export bucket without a locked retention policy",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [
+        "2.3"
+      ],
+      "remediation": [
+        "Console > Cloud Storage > bucket > Protection > Retention policy; set a period that matches your policy.",
+        "Lock the policy (cannot be reduced or removed afterwards, so confirm the period first)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-001",
+      "domain": "Networking",
+      "name": "Default network exists",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.1"
+      ],
+      "remediation": [
+        "Create purpose-built VPC networks and subnets, move workloads over, then delete the default network.",
+        "Enforce compute.skipDefaultNetworkCreation (ORG-007) for new projects."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-002",
+      "domain": "Networking",
+      "name": "Legacy network exists",
+      "severity": "Medium",
+      "scf": "NET-01",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.2"
+      ],
+      "remediation": [
+        "Migrate workloads to a VPC network with subnets, then delete the legacy network."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-003",
+      "domain": "Networking",
+      "name": "SSH (22) allowed from the internet",
+      "severity": "High",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.6"
+      ],
+      "remediation": [
+        "Console > VPC network > Firewall; edit or delete rules that allow tcp:22 from 0.0.0.0/0.",
+        "Use Identity-Aware Proxy TCP forwarding (source 35.235.240.0/20) or OS Login with a bastion instead."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-004",
+      "domain": "Networking",
+      "name": "RDP (3389) allowed from the internet",
+      "severity": "High",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.7"
+      ],
+      "remediation": [
+        "Console > VPC network > Firewall; edit or delete rules that allow tcp:3389 from 0.0.0.0/0.",
+        "Use Identity-Aware Proxy TCP forwarding or a VPN instead."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-005",
+      "domain": "Networking",
+      "name": "All protocols or ports allowed from the internet",
+      "severity": "Critical",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Console > VPC network > Firewall; replace allow-all ingress rules from 0.0.0.0/0 with rules for the specific ports and sources needed."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-006",
+      "domain": "Networking",
+      "name": "VPC Flow Logs disabled on subnets",
+      "severity": "Medium",
+      "scf": "MON-01",
+      "nistCsf": "DE.CM-01",
+      "cis": [
+        "3.8"
+      ],
+      "remediation": [
+        "Console > VPC network > subnet > Edit > Flow logs: On. Tune the sampling rate and metadata to control cost."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-007",
+      "domain": "Networking",
+      "name": "DNSSEC disabled on public DNS zones",
+      "severity": "Medium",
+      "scf": "NET-10",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "3.3"
+      ],
+      "remediation": [
+        "Console > Cloud DNS > zone > DNSSEC: On, then add the DS record at the registrar."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "NET-008",
+      "domain": "Networking",
+      "name": "DNSSEC uses RSASHA1 signing",
+      "severity": "Low",
+      "scf": "CRY-01",
+      "nistCsf": "PR.DS-02",
+      "cis": [
+        "3.4",
+        "3.5"
+      ],
+      "remediation": [
+        "Change the zone's key signing and zone signing algorithms to RSASHA256 or ECDSAP256SHA256 and update the DS record."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-001",
+      "domain": "Organization policy",
+      "name": "Service account key creation is not blocked (iam.disableServiceAccountKeyCreation)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Disable service account key creation: Enforce (organisation, folder or project)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-002",
+      "domain": "Organization policy",
+      "name": "Public access prevention not enforced (storage.publicAccessPrevention)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Enforce public access prevention: Enforce."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-003",
+      "domain": "Organization policy",
+      "name": "OS Login not required (compute.requireOsLogin)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Require OS Login: Enforce."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-004",
+      "domain": "Organization policy",
+      "name": "External IPs on VMs not denied (compute.vmExternalIpAccess)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Define allowed external IPs for VM instances: Deny all (allow named exceptions)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-005",
+      "domain": "Organization policy",
+      "name": "Domain restricted sharing not set (iam.allowedPolicyMemberDomains)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Domain restricted sharing: Allow only your Cloud Identity / Workspace customer IDs."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-006",
+      "domain": "Organization policy",
+      "name": "Public Cloud SQL IPs not restricted (sql.restrictPublicIp)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Restrict public IP access on Cloud SQL instances: Enforce."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-007",
+      "domain": "Organization policy",
+      "name": "Default network is still created for new projects (compute.skipDefaultNetworkCreation)",
+      "severity": "Low",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Skip default network creation: Enforce."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-008",
+      "domain": "Organization policy",
+      "name": "Serial port access not disabled (compute.disableSerialPortAccess)",
+      "severity": "Low",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Disable VM serial port access: Enforce."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "ORG-009",
+      "domain": "Organization policy",
+      "name": "Default service accounts get Editor automatically (iam.automaticIamGrantsForDefaultServiceAccounts)",
+      "severity": "Medium",
+      "scf": "CFG-02",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Console > IAM & Admin > Organization Policies > Disable automatic IAM grants for default service accounts: Enforce."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "SQL-001",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL instances have public IP addresses",
+      "severity": "High",
+      "scf": "NET-03",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "6.6"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Connections: use Private IP and remove the public IP.",
+        "Enforce sql.restrictPublicIp (ORG-006)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "SQL-002",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL authorized networks include 0.0.0.0/0",
+      "severity": "High",
+      "scf": "NET-04",
+      "nistCsf": "PR.IR-01",
+      "cis": [
+        "6.5"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Connections > Authorized networks; remove 0.0.0.0/0 and list only the addresses that need access (or use the Cloud SQL Auth Proxy)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "SQL-003",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL instances accept unencrypted connections",
+      "severity": "High",
+      "scf": "CRY-03",
+      "nistCsf": "PR.DS-02",
+      "cis": [
+        "6.4"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Connections > Security: require SSL / encrypted connections only."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "SQL-004",
+      "domain": "Cloud SQL",
+      "name": "Cloud SQL automated backups disabled",
+      "severity": "Medium",
+      "scf": "BCD-11",
+      "nistCsf": "PR.DS-11",
+      "cis": [
+        "6.7"
+      ],
+      "remediation": [
+        "Console > SQL > instance > Backups: enable automated backups and point-in-time recovery, and test a restore."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "STO-001",
+      "domain": "Cloud Storage",
+      "name": "Buckets are publicly accessible",
+      "severity": "Critical",
+      "scf": "IAC-20",
+      "nistCsf": "PR.DS-01",
+      "cis": [
+        "5.1"
+      ],
+      "remediation": [
+        "Console > Cloud Storage > bucket > Permissions; remove allUsers and allAuthenticatedUsers.",
+        "Turn on public access prevention for the bucket and enforce storage.publicAccessPrevention (ORG-002)."
+      ],
+      "source": "cloud"
+    },
+    {
+      "id": "STO-002",
+      "domain": "Cloud Storage",
+      "name": "Uniform bucket-level access disabled",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [
+        "5.2"
+      ],
+      "remediation": [
+        "Console > Cloud Storage > bucket > Permissions > Access control: Uniform. Check that nothing relies on object ACLs first."
+      ],
+      "source": "cloud"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import copy
 
-from gcp_gap_assessment.gcloud import Gcloud, GcloudError, is_read_only
+from google_gap_assessment.cloud.gcloud import Gcloud, GcloudError, is_read_only
 
 PROJECT = "test-project-one"
 SA = f"app@{PROJECT}.iam.gserviceaccount.com"
