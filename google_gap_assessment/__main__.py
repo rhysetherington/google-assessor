@@ -1,4 +1,4 @@
-"""Command line: ``python3 -m gcp_gap_assessment --project-id my-project``."""
+"""Command line: ``python3 -m google_gap_assessment --project-id my-project``."""
 
 from __future__ import annotations
 
@@ -9,13 +9,13 @@ from pathlib import Path
 from . import __version__
 from .assess import CHECK_INDEX, DEFAULT_DOMAINS, DOMAINS, export_assessment, run_assessment
 from .model import CONTROL_MAPPING
-from .gcloud import Gcloud
+from .cloud.gcloud import Gcloud
 from .model import Options
 from .validation import is_numeric_id, is_project_id, is_service_account_email
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="gcp_gap_assessment", description="Read-only Google Cloud security gap assessment using the gcloud CLI.")
+    p = argparse.ArgumentParser(prog="google_gap_assessment", description="Read-only Google Cloud security gap assessment using the gcloud CLI.")
     p.add_argument("--project-id", action="append", default=[], metavar="ID", help="project to assess (repeat for several; asked for when no scope is given)")
     p.add_argument("--folder-id", metavar="NUMBER", help="assess the active projects directly under this folder")
     p.add_argument("--organization-id", metavar="NUMBER", help="assess the active projects directly under this organisation")

@@ -3,8 +3,8 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 
-from gcp_gap_assessment.checks.common import Context
-from gcp_gap_assessment.model import Options
+from google_gap_assessment.cloud.checks.common import Context
+from google_gap_assessment.model import Options
 from tests_python.fakes import (DEFAULT_COMPUTE_SA, DENIED, DISABLED, KEYS_KEY, PROJECT, SA, Err, FakeGcloud, add_binding, healthy)
 
 RECENT = (datetime.now(timezone.utc) - timedelta(days=5)).strftime("%Y-%m-%dT%H:%M:%SZ")

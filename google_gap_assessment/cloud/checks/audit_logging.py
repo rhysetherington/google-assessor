@@ -6,7 +6,7 @@ or the organisation are not visible from a project, so a gap here can be covered
 
 from __future__ import annotations
 
-from ..model import ProjectResult, gap_or_pass, g
+from ...model import ProjectResult, gap_or_pass, g
 from .common import Context, has_items, registrar, run_checks
 
 CHECKS: list = []

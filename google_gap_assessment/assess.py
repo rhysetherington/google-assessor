@@ -6,10 +6,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import __version__, accepted, guard, metadata, report, scope
-from .checks import audit_logging, compute, iam, kms, network, orgpolicy, sql, storage
-from .checks.common import Context
-from .gcloud import Gcloud, GcloudError
+from . import __version__, accepted, metadata, report
+from .cloud import guard, scope
+from .cloud.checks import audit_logging, compute, iam, kms, network, orgpolicy, sql, storage
+from .cloud.checks.common import Context
+from .cloud.gcloud import Gcloud, GcloudError
 from .model import SEVERITY_ORDER, Options, measure_score
 from .validation import is_project_id, is_service_account_email
 

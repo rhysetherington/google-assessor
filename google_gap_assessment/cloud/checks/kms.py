@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from typing import NamedTuple
 
-from ..model import gap_or_pass, g
+from ...model import gap_or_pass, g
 from .common import Context, binding_pairs, is_public, leaf, registrar, run_checks
 
 CHECKS: list = []

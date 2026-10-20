@@ -7,7 +7,7 @@ organisation-level read.
 
 from __future__ import annotations
 
-from ..model import ProjectResult, gap_or_pass, g
+from ...model import ProjectResult, gap_or_pass, g
 from .common import (Context, Pair, binding_pairs, has_items, is_public, leaf, older_than, registrar, run_checks, service_account_kind)
 
 CHECKS: list = []

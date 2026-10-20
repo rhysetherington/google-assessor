@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-from .gcloud import GcloudError
+from .errors import ApiError
 
 SEVERITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3, "Informational": 4}
 
@@ -79,7 +79,7 @@ def run_project_check(project: str, ids: "list[str]", fn: "Callable[[str], Itera
         # Fully collected before use, so results produced before a failure are discarded rather than half reported.
         results = list(fn(project))
     except Exception as exc:  # noqa: BLE001 - deliberately broad: see docstring
-        category = exc.category if isinstance(exc, GcloudError) else "Other"
+        category = exc.category if isinstance(exc, ApiError) else "Other"
         if category == "ApiDisabled":
             status, detail = "NotApplicable", "The API is not enabled in this project, so there is nothing to assess."
         else:

@@ -14,6 +14,8 @@ import subprocess
 import time
 from typing import Any, Callable, Sequence
 
+from ..errors import ApiError
+
 # gcloud commands end in a verb ("compute instances LIST"). Only these three verbs read without side effects.
 READ_ONLY_VERBS = ("list", "describe", "get-iam-policy")
 
@@ -21,12 +23,8 @@ READ_ONLY_VERBS = ("list", "describe", "get-iam-policy")
 Runner = Callable[[Sequence[str]], "tuple[int, str, str]"]
 
 
-class GcloudError(Exception):
+class GcloudError(ApiError):
     """A failed gcloud call. ``category`` lets callers tell "nothing to assess" from "could not assess"."""
-
-    def __init__(self, message: str, category: str = "Other"):
-        super().__init__(message)
-        self.category = category
 
 
 def is_read_only(command: "str | Sequence[str]") -> bool:

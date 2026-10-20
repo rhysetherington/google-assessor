@@ -84,7 +84,7 @@ def to_markdown(a: dict, evidence_root: "Path | None" = None) -> str:
     if m.get("Reference"): md.append(f"| **Reference** | {md_cell(m['Reference'])} |")
     md += [f"| **Scope** | {md_cell(scope_text(a))} |",
            f"| **Assessed** | {a['AssessedAt'][:16].replace('T', ' ')} UTC by {md_cell(a['AssessedBy'])} |",
-           f"| **Tool version** | gcp_gap_assessment {a['ModuleVersion']} (read-only) |", "",
+           f"| **Tool version** | google_gap_assessment {a['ModuleVersion']} (read-only) |", "",
            "## Executive Summary", "", "| Metric | Value |\n|---|---|",
            f"| Compliance score | **{score_text(a)}** |", f"| Checks performed | {s['TotalChecks']} |", f"| Passed | {s['Passed']} |",
            f"| Gaps | {s['Gaps']} |", f"| Not assessed (permission or error) | {s['NotAssessed']} |"]
@@ -171,7 +171,7 @@ def to_html(a: dict, brand_color: "str | None" = None, evidence_root: "Path | No
         cls = {"Gap": "s-Gap", "Pass": "s-Pass", "Accepted": "s-Pass"}.get(r["Status"], "s-Not")
         out.append(f'<tr><td>{e(r["Nist"])}</td><td>{e(r["Scf"])}</td><td class="{cls}">{e(r["Status"])}</td><td>{e(r["Finding"])}</td></tr>')
     out.append("</table></div></details></section>")
-    out.append(f"<footer>Assessed {e(a['AssessedAt'][:16].replace('T', ' '))} UTC &middot; gcp_gap_assessment {e(a['ModuleVersion'])}. Read-only assessment: no changes were made to any project.</footer></main></body></html>")
+    out.append(f"<footer>Assessed {e(a['AssessedAt'][:16].replace('T', ' '))} UTC &middot; google_gap_assessment {e(a['ModuleVersion'])}. Read-only assessment: no changes were made to any project.</footer></main></body></html>")
     return "".join(out)
 
 

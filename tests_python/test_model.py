@@ -3,13 +3,14 @@
 import unittest
 from datetime import date
 
-from gcp_gap_assessment import accepted, guard
-from gcp_gap_assessment.checks import network
-from gcp_gap_assessment.checks.common import Context, service_account_kind
-from gcp_gap_assessment.checks.orgpolicy import policy_enforced
-from gcp_gap_assessment.gcloud import GcloudError
-from gcp_gap_assessment.model import ProjectResult as R, measure_score, merge_results, new_finding, run_project_check
-from gcp_gap_assessment.validation import is_numeric_id, is_project_id, is_service_account_email, safe_name
+from google_gap_assessment import accepted
+from google_gap_assessment.cloud import guard
+from google_gap_assessment.cloud.checks import network
+from google_gap_assessment.cloud.checks.common import Context, service_account_kind
+from google_gap_assessment.cloud.checks.orgpolicy import policy_enforced
+from google_gap_assessment.cloud.gcloud import GcloudError
+from google_gap_assessment.model import ProjectResult as R, measure_score, merge_results, new_finding, run_project_check
+from google_gap_assessment.validation import is_numeric_id, is_project_id, is_service_account_email, safe_name
 from tests_python.fakes import DENIED, FakeGcloud, add_binding, healthy
 
 

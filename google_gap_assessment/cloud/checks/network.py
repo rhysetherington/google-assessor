@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-from ..model import gap_or_pass, g
+from ...model import gap_or_pass, g
 from .common import Context, has_items, leaf, registrar, run_checks
 
 CHECKS: list = []

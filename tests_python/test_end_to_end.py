@@ -9,13 +9,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from gcp_gap_assessment import coverage
-from gcp_gap_assessment.__main__ import main
-from gcp_gap_assessment.assess import export_assessment, run_assessment
-from gcp_gap_assessment.model import CONTROL_MAPPING
+from google_gap_assessment import coverage
+from google_gap_assessment.__main__ import main
+from google_gap_assessment.assess import export_assessment, run_assessment
+from google_gap_assessment.model import CONTROL_MAPPING
 from tests_python.fakes import DENIED, PROJECT, Err, FakeGcloud, add_binding, healthy
 
-PKG = Path(__file__).parent.parent / "gcp_gap_assessment"
+PKG = Path(__file__).parent.parent / "google_gap_assessment"
 
 
 def run(mutate=None, **kw):
@@ -122,7 +122,7 @@ class Reports(unittest.TestCase):
         self.assertIn("evidence/IAM-003.csv", md)
 
     def test_evidence_files_are_written_and_formula_values_are_neutralised(self):
-        from gcp_gap_assessment.evidence import safe_csv_value
+        from google_gap_assessment.evidence import safe_csv_value
         self.assertTrue((self.folder / "evidence" / "IAM-003.csv").exists())
         self.assertTrue((self.folder / "evidence" / "_index.csv").exists())
         # Affected items start with the project ID today, so also prove the sanitiser directly: a leading = + - @ or tab is defused.
@@ -150,7 +150,7 @@ class Mapping(unittest.TestCase):
     def test_every_control_is_complete_sorted_and_used_by_a_collector(self):
         ids = list(CONTROL_MAPPING)
         self.assertEqual(sorted(ids), ids)
-        code = "\n".join(p.read_text() for p in (PKG / "checks").glob("*.py"))
+        code = "\n".join(p.read_text() for p in (PKG / "cloud" / "checks").glob("*.py"))
         for cid, c in CONTROL_MAPPING.items():
             with self.subTest(cid):
                 self.assertRegex(cid, r"^(IAM|LOG|NET|CMP|STO|SQL|KMS|ORG)-\d{3}$")
@@ -163,7 +163,7 @@ class Mapping(unittest.TestCase):
                 self.assertIn(f'"{cid}"', code, f"{cid} is not produced by any collector")
 
     def test_every_id_used_in_code_has_a_mapping_entry(self):
-        code = "\n".join(p.read_text() for p in (PKG / "checks").glob("*.py"))
+        code = "\n".join(p.read_text() for p in (PKG / "cloud" / "checks").glob("*.py"))
         used = set(re.findall(r'"((?:IAM|LOG|NET|CMP|STO|SQL|KMS|ORG)-\d{3})"', code))
         self.assertEqual(set(), used - set(CONTROL_MAPPING))
 

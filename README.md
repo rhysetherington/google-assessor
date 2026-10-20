@@ -25,23 +25,23 @@ You need Python 3.11 or later and the Google Cloud CLI, signed in:
 gcloud auth login
 git clone https://github.com/rhysetherington/google-assessor.git
 cd google-assessor
-python3 -m gcp_gap_assessment --project-id my-project-id --format JSON Markdown HTML
+python3 -m google_gap_assessment --project-id my-project-id --format JSON Markdown HTML
 ```
 
 If you leave out `--project-id` (and `--folder-id` / `--organization-id`) you are asked for the project. You are also asked for a client name,
 assessor and date for the report header (`--no-prompt` accepts the defaults). Reports are written to `./GcpAssessment/<ClientName>-<date>/`;
-open the `.html` file. Run `python3 -m gcp_gap_assessment --help` for every option.
+open the `.html` file. Run `python3 -m google_gap_assessment --help` for every option.
 
 ```bash
 # Everything directly under an organisation, as a dedicated read-only service account, against your own e-mail domains
-python3 -m gcp_gap_assessment --organization-id 123456789012 --corporate-domain contoso.com \
+python3 -m google_gap_assessment --organization-id 123456789012 --corporate-domain contoso.com \
     --impersonate-service-account assessor@security-project.iam.gserviceaccount.com --include-evidence --format JSON Markdown HTML
 
 # Only some domains; Kms is opt-in and scans the locations you name
-python3 -m gcp_gap_assessment --project-id my-project-id --domain Iam Network Kms --kms-location global --kms-location europe-west2
+python3 -m google_gap_assessment --project-id my-project-id --domain Iam Network Kms --kms-location global --kms-location europe-west2
 ```
 
-From Python: `from gcp_gap_assessment.assess import run_assessment, export_assessment` (see `__main__.py` for a worked example).
+From Python: `from google_gap_assessment.assess import run_assessment, export_assessment` (see `__main__.py` for a worked example).
 
 ## Domains
 
@@ -115,7 +115,7 @@ edition you hold.
 ## Layout: one file per domain, one function per check
 
 ```
-gcp_gap_assessment/
+google_gap_assessment/
   checks/
     iam.py            IAM-001..011     one function per check, registered in CHECKS
     audit_logging.py  LOG-001..003
@@ -131,7 +131,7 @@ tests_python/checks/  test_iam.py ...  one test file per domain, plus test_regis
 ```
 
 Each check is a short function with a docstring saying what it tests, for example `iam.py: public_principals` is `IAM-003`.
-`python3 -m gcp_gap_assessment --list-checks` prints the id, domain, severity and name of every check.
+`python3 -m google_gap_assessment --list-checks` prints the id, domain, severity and name of every check.
 
 ## Redo a specific check
 
@@ -139,7 +139,7 @@ An auditor or admin asks for one check to be repeated after a fix? Run just that
 only the data it needs is read. The report is labelled **PARTIAL ASSESSMENT** so it cannot be mistaken for a full one.
 
 ```bash
-python3 -m gcp_gap_assessment --project-id my-project-id --check IAM-003 CMP-005
+python3 -m google_gap_assessment --project-id my-project-id --check IAM-003 CMP-005
 ```
 
 To change how a check decides, edit its function in the domain file and its case in the matching `tests_python/checks/test_<domain>.py`
@@ -150,10 +150,10 @@ To change how a check decides, edit its function in the domain file and its case
 ```bash
 python3 -m unittest discover -s tests_python -t .     # offline, well under a second
 python3 -m unittest tests_python.checks.test_iam      # one domain
-python3 -m gcp_gap_assessment.coverage                # regenerate Docs/Coverage.md after changing the mapping
+python3 -m google_gap_assessment.coverage                # regenerate Docs/Coverage.md after changing the mapping
 ```
 
-To add a check: (1) add it to `gcp_gap_assessment/data/control_mapping.json` (id, domain, name, severity, SCF, NIST CSF, CIS, remediation;
+To add a check: (1) add it to `google_gap_assessment/data/control_mapping.json` (id, domain, name, severity, SCF, NIST CSF, CIS, remediation;
 ids are never reused); (2) in the domain module, add a function decorated with `@check("XXX-000")` that returns
 `gap_or_pass(...)` built from `ctx.gcloud.get_list("<read-only command>", ...)`, using only `list`, `describe` and `get-iam-policy`;
 (3) return `NotAssessed`, never `Pass`, for any field gcloud did not return; (4) add a case to the domain's test file. The registry tests fail

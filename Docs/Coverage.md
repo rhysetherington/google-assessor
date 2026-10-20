@@ -1,6 +1,6 @@
 # Coverage
 
-Generated from `gcp_gap_assessment/data/control_mapping.json` by `python3 -m gcp_gap_assessment.coverage`; do not edit by hand. 47 checks.
+Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. 47 checks.
 
 CIS numbers refer to the CIS Google Cloud Platform Foundation Benchmark (v3.0.0 numbering) and appear only where a check tests the same setting. Confirm them against the edition you hold; the benchmark is renumbered between releases.
 

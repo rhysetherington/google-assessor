@@ -7,7 +7,7 @@ Viewer role; without it the checks are NotAssessed. A constraint with no policy 
 from __future__ import annotations
 
 from ..gcloud import GcloudError
-from ..model import ProjectResult, gap_or_pass, g
+from ...model import ProjectResult, gap_or_pass, g
 from .common import Check, Context, has_items, run_checks
 
 # (finding id, constraint, how to evaluate it, why it matters)

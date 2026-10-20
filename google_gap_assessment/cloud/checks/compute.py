@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import re
 
-from ..model import gap_or_pass
+from ...model import gap_or_pass
 from .common import Context, leaf, registrar, run_checks, service_account_kind
 
 CHECKS: list = []

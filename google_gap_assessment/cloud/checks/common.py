@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Callable, Iterable, Iterator, NamedTuple
 
 from ..gcloud import Gcloud
-from ..model import Options, ProjectResult, merge_results, run_project_check
+from ...model import Options, ProjectResult, merge_results, run_project_check
 
 
 @dataclass

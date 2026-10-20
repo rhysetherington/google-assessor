@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ..model import ProjectResult, gap_or_pass, g
+from ...model import ProjectResult, gap_or_pass, g
 from .common import Context, registrar, run_checks
 
 CHECKS: list = []

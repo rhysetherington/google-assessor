@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 
 from .gcloud import Gcloud
-from .validation import is_project_id
+from ..validation import is_project_id
 
 
 def project_detail(gcloud: Gcloud, project_id: str) -> "dict | None":

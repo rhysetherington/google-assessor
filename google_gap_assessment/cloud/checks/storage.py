@@ -6,7 +6,7 @@ A setting gcloud does not return is NotAssessed, never assumed to be on or off.
 
 from __future__ import annotations
 
-from ..model import ProjectResult, gap_or_pass, g
+from ...model import ProjectResult, gap_or_pass, g
 from .common import Context, binding_pairs, is_public, registrar, run_checks
 
 CHECKS: list = []

@@ -5,9 +5,9 @@ import re
 import unittest
 from pathlib import Path
 
-from gcp_gap_assessment.gcloud import Gcloud, GcloudError, classify_error, is_read_only
+from google_gap_assessment.cloud.gcloud import Gcloud, GcloudError, classify_error, is_read_only
 
-PACKAGE = Path(__file__).parent.parent / "gcp_gap_assessment"
+PACKAGE = Path(__file__).parent.parent / "google_gap_assessment"
 
 
 class ReadOnlyGate(unittest.TestCase):
