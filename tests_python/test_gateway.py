@@ -115,7 +115,7 @@ class SourceScan(unittest.TestCase):
                 self.assertNotRegex(text, r"shell\s*=\s*True|os\.system|os\.popen|\beval\(|\bexec\(")
 
     def test_only_the_gcloud_gateway_and_the_token_helper_start_processes(self):
-        users = sorted(str(p.relative_to(PACKAGE)) for p in PACKAGE.rglob("*.py") if "subprocess" in p.read_text() and p.name != "__init__.py")
+        users = sorted(p.relative_to(PACKAGE).as_posix() for p in PACKAGE.rglob("*.py") if "subprocess" in p.read_text() and p.name != "__init__.py")
         self.assertEqual(["cloud/gcloud.py", "workspace/auth.py"], users)
 
     def test_the_token_helper_runs_exactly_one_gcloud_command(self):
