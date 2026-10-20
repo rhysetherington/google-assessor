@@ -30,6 +30,12 @@ MERGE_SETTINGS = {
     "security.less_secure_apps", "security.super_admin_account_recovery", "security.user_account_recovery",
     "workspace_marketplace.apps_access_options",
 }
+# Settings that are lists of entries identified by a key. Several policies each carry part of the list, and the entries are combined:
+# an entry only a lower-priority policy has is added, and fields the winning entry lacks are filled in (Google's "max map" reducer).
+MAX_MAP_SETTINGS = {
+    "gmail.blocked_sender_lists": ("blockedSenders", "ruleId"), "gmail.email_address_lists": ("emailAddressList", "id"),
+    "gmail.rule_states": ("ruleStates", "ruleId"), "gmail.spam_override_lists": ("spamOverride", "ruleId"),
+}
 # Settings that are independent rules: every policy is kept, none overrides another.
 LIST_SETTINGS = {"rule.dlp", "rule.system_defined_alerts"}
 
@@ -120,6 +126,19 @@ def reduce_policies(raw: "list[dict]", ou_paths: "dict[str, str]", group_emails:
         elif name in MERGE_SETTINGS:
             for k, v in value.items():
                 scope[name].setdefault(k, v)
+        elif name in MAX_MAP_SETTINGS:
+            field, key = MAX_MAP_SETTINGS[name]
+            entries = scope[name].setdefault(field, [])
+            by_key = {e.get(key): e for e in entries if isinstance(e, dict)}
+            for entry in value.get(field) or []:
+                known = by_key.get(entry.get(key)) if isinstance(entry, dict) else None
+                if known is not None:
+                    for k, v in entry.items():
+                        known.setdefault(k, v)
+                else:
+                    entries.append(dict(entry) if isinstance(entry, dict) else entry)
+                    if isinstance(entry, dict):
+                        by_key[entry.get(key)] = entries[-1]
 
     top = result.scopes.setdefault(TOP, {})
     for name, defaults in DEFAULTS.items():
