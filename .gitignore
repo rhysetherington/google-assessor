@@ -11,6 +11,9 @@ Assessments/
 *.p12
 *-credentials.json
 *service-account*.json
+client_secret*.json
+client_id*.json
+application_default_credentials.json
 *accepted*.json
 *.log
 
