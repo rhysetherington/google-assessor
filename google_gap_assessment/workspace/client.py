@@ -80,8 +80,11 @@ class WorkspaceClient:
                     body = response.read().decode("utf-8")
                 return json.loads(body) if body.strip() else {}
             except urllib.error.HTTPError as exc:
-                error = classify_http_error(exc.code, exc.read().decode("utf-8", "replace"))
-                retry_after = exc.headers.get("Retry-After") if exc.headers else None
+                try:
+                    error = classify_http_error(exc.code, exc.read().decode("utf-8", "replace"))
+                    retry_after = exc.headers.get("Retry-After") if exc.headers else None
+                finally:
+                    exc.close()  # an error response holds the connection open until it is closed
             except urllib.error.URLError as exc:
                 error, retry_after = ApiError(f"network error: {exc.reason}", "Transient"), None
             if error.category == "Transient" and attempt < self._max_retries:

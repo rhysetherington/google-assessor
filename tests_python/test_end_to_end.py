@@ -1,6 +1,8 @@
 """A whole run against the fake gcloud: scope, metadata, every domain, scoring, accepted risks and the files that come out,
 including hostile resource names to prove reports cannot become markup or spreadsheet formulas."""
 
+import contextlib
+import io
 import json
 import re
 import stat
@@ -182,9 +184,33 @@ class Docs(unittest.TestCase):
                 self.assertIsNone(pattern.search(path.read_text(errors="ignore")), str(path))
 
 
+class ScubaIndex(unittest.TestCase):
+    def setUp(self):
+        self.index = json.loads((PKG / "data" / "scuba_policies.json").read_text())
+        self.covered = {ref.removesuffix("v1") for c in CONTROL_MAPPING.values() for ref in c.get("scuba", [])}
+
+    def test_every_scuba_reference_in_the_mapping_is_a_real_policy(self):
+        self.assertEqual(set(), self.covered - set(self.index["policies"]))
+        for c in CONTROL_MAPPING.values():
+            for ref in c.get("scuba", []):
+                self.assertRegex(ref, r"^GWS\.[A-Z]+\.\d+\.\d+v1$")
+
+    def test_every_policy_is_either_covered_or_has_a_recorded_reason(self):
+        self.assertEqual(set(self.index["policies"]) - self.covered, set(self.index["not_covered"]))
+        for pid, info in self.index["not_covered"].items():
+            with self.subTest(pid):
+                self.assertIn(info["reason"], self.index["reasons"])
+                self.assertTrue(info["note"].strip())
+
+    def test_scuba_references_appear_only_on_workspace_checks(self):
+        for c in CONTROL_MAPPING.values():
+            if c.get("scuba"):
+                self.assertEqual("workspace", c["source"], c["id"])
+
+
 class Cli(unittest.TestCase):
     def test_cli_runs_end_to_end_and_writes_reports(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory() as d, contextlib.redirect_stdout(io.StringIO()):
             code = main(["--project-id", PROJECT, "--no-prompt", "--export-path", d, "--client-name", "Cli Test", "--assessment-date", "2026-10-18",
                          "--format", "JSON", "Markdown"], gcloud=FakeGcloud(healthy()))
             self.assertEqual(0, code)

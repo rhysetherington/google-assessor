@@ -1,8 +1,8 @@
 # Coverage
 
-Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. 148 checks.
+Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. 155 checks.
 
-## Google Workspace (101 checks)
+## Google Workspace (108 checks)
 
 SCuBA references are the CISA Secure Cloud Business Applications baseline policies each check covers (`COMMONCONTROLS.5.2` is `GWS.COMMONCONTROLS.5.2v1`); a check with `-` is an addition of our own.
 
@@ -25,6 +25,17 @@ SCuBA references are the CISA Secure Cloud Business Applications baseline polici
 | GCH-003 | Files can be shared with people outside the organisation in Chat | Medium | CHAT.2.1 | PR.DS-01 | DCH-14 |
 | GCH-004 | Space history is not always on | Low | CHAT.3.1 | PR.PS-04 | MON-10 |
 | GCH-005 | External chat is not limited to allowlisted domains | Medium | CHAT.4.1 | PR.IR-01 | NET-12 |
+
+### Workspace: Classroom
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GCR-001 | Outsiders can join classes | Low | CLASSROOM.1.1 | PR.AA-05 | IAC-20 |
+| GCR-002 | Users can join classes run by other organisations | Low | CLASSROOM.1.2 | PR.AA-05 | IAC-20 |
+| GCR-003 | Users can authorise apps to access Classroom data | Medium | CLASSROOM.2.1 | PR.AA-05 | IAC-20 |
+| GCR-004 | Roster import is enabled | Low | CLASSROOM.3.1 | PR.PS-01 | CFG-03 |
+| GCR-005 | Students can unenrol other students | Low | CLASSROOM.4.1 | PR.AA-05 | IAC-20 |
+| GCR-006 | Anyone can create classes | Low | CLASSROOM.5.1 | PR.AA-05 | IAC-20 |
 
 ### Workspace: Drive and Docs
 
@@ -142,6 +153,12 @@ SCuBA references are the CISA Secure Cloud Business Applications baseline polici
 | GMT-005 | Meetings are recorded automatically | Low | MEET.5.1 | PR.DS-01 | DCH-01 |
 | GMT-006 | Meetings are transcribed automatically | Low | MEET.5.2 | PR.DS-01 | DCH-01 |
 
+### Workspace: Sites
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GST-001 | Google Sites is enabled for users | Low | SITES.1.1 | PR.PS-01 | CFG-03 |
+
 ## Google Cloud (47 checks)
 
 CIS numbers refer to the CIS Google Cloud Platform Foundation Benchmark (v3.0.0 numbering) and appear only where a check tests the same setting. Confirm them against the edition you hold; the benchmark is renumbered between releases.
@@ -232,6 +249,46 @@ CIS numbers refer to the CIS Google Cloud Platform Foundation Benchmark (v3.0.0 
 | ORG-007 | Default network is still created for new projects (compute.skipDefaultNetworkCreation) | Low | - | PR.PS-01 | CFG-02 |
 | ORG-008 | Serial port access not disabled (compute.disableSerialPortAccess) | Low | - | PR.PS-01 | CFG-02 |
 | ORG-009 | Default service accounts get Editor automatically (iam.automaticIamGrantsForDefaultServiceAccounts) | Medium | - | PR.PS-01 | CFG-02 |
+
+## CISA SCuBA coverage (105 of 138 policies)
+
+Every Workspace baseline policy that is not covered, and why. The reasons: **manual** = no API exposes it; **audit-log** = visible only in the admin audit log; **unverified** = setting fields not verified; **not-adopted** = a deliberate choice; **not-applicable** = does not apply outside the original audience.
+
+| Policy | Reason | Note |
+|---|---|---|
+| ASSUREDCONTROLS.1.1 | not-applicable | Applies only to tenants that use Assured Controls / Assured Workloads (a Google add-on); review manually if you do. |
+| ASSUREDCONTROLS.1.2 | not-applicable | Applies only to tenants that use Assured Controls / Assured Workloads (a Google add-on); review manually if you do. |
+| ASSUREDCONTROLS.2.1 | not-applicable | Applies only to tenants that use Assured Controls / Assured Workloads (a Google add-on); review manually if you do. |
+| CALENDAR.3.2 | manual | How Calendar Interop authenticates to Microsoft 365 is not exposed by the APIs this tool reads. |
+| CHAT.5.1 | audit-log | Chat content-reporting settings appear only in the admin audit log; reading the Reports API for them is planned. |
+| CHAT.5.2 | audit-log | Chat content-reporting settings appear only in the admin audit log; reading the Reports API for them is planned. |
+| COMMONCONTROLS.14.1 | manual | Log export to a SIEM and audit-log retention are not exposed by the read-only APIs. |
+| COMMONCONTROLS.14.2 | manual | Log export to a SIEM and audit-log retention are not exposed by the read-only APIs. |
+| COMMONCONTROLS.16.1 | unverified | The "additional Google services" are many per-service switches that are not mapped yet. |
+| COMMONCONTROLS.16.2 | unverified | The "additional Google services" are many per-service switches that are not mapped yet. |
+| COMMONCONTROLS.16.3 | unverified | The "additional Google services" are many per-service switches that are not mapped yet. |
+| COMMONCONTROLS.16.4 | unverified | The "additional Google services" are many per-service switches that are not mapped yet. |
+| COMMONCONTROLS.2.1 | manual | Context-aware access levels are managed in Access Context Manager, which this tool does not read. |
+| COMMONCONTROLS.3.1 | audit-log | Post-SSO verification appears only in the admin audit log; reading the Reports API for it is planned. |
+| COMMONCONTROLS.3.2 | audit-log | Post-SSO verification appears only in the admin audit log; reading the Reports API for it is planned. |
+| COMMONCONTROLS.8.3 | unverified | The recovery-contact setting is not in the settings list we could verify the field names for. |
+| COMMONCONTROLS.9.1 | manual | Advanced Protection Program enrolment is not exposed by the APIs this tool reads. |
+| COMMONCONTROLS.9.2 | manual | Advanced Protection Program enrolment is not exposed by the APIs this tool reads. |
+| DRIVEDOCS.1.10 | manual | Form-response behaviour has no API. |
+| DRIVEDOCS.1.11 | manual | Form-response behaviour has no API. |
+| DRIVEDOCS.2.2 | not-adopted | CISA wants people who are not members of a shared drive to be allowed on its files. That is a policy choice we leave to the organisation (GDR-011 reports shared drives open to outsiders). |
+| DRIVEDOCS.5.2 | manual | Ransomware-corruption monitoring is an alert setting with no API. |
+| GEMINI.1.1 | unverified | The Gemini setting fields cannot be verified without a tenant that has Gemini, and CISA reads most of them from audit logs. |
+| GEMINI.2.1 | unverified | The Gemini setting fields cannot be verified without a tenant that has Gemini, and CISA reads most of them from audit logs. |
+| GEMINI.3.1 | unverified | The Gemini setting fields cannot be verified without a tenant that has Gemini, and CISA reads most of them from audit logs. |
+| GEMINI.3.2 | unverified | The Gemini setting fields cannot be verified without a tenant that has Gemini, and CISA reads most of them from audit logs. |
+| GEMINI.4.1 | unverified | The Gemini setting fields cannot be verified without a tenant that has Gemini, and CISA reads most of them from audit logs. |
+| GMAIL.13.1 | audit-log | The external-recipient warning appears only in the admin audit log. |
+| GMAIL.16.1 | audit-log | The security sandbox appears only in the admin audit log. |
+| GMAIL.4.3 | not-applicable | Requires sending DMARC reports to a US federal address. GML-006 checks that you collect DMARC reports at all. |
+| MEET.6.1 | audit-log | The AI-notes settings appear only in the admin audit log. |
+| MEET.6.2 | audit-log | The AI-notes settings appear only in the admin audit log. |
+| MEET.6.3 | audit-log | The AI-notes settings appear only in the admin audit log. |
 
 ## Not covered yet
 

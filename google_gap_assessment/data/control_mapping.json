@@ -288,6 +288,102 @@
       ]
     },
     {
+      "id": "GCR-001",
+      "domain": "Workspace: Classroom",
+      "name": "Outsiders can join classes",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Class membership: set \"Who can join classes in your domain\" to \"Users in your domain only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.1.1v1"
+      ]
+    },
+    {
+      "id": "GCR-002",
+      "domain": "Workspace: Classroom",
+      "name": "Users can join classes run by other organisations",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Class membership: set \"Which classes can users in your domain join\" to \"Classes in your domain only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.1.2v1"
+      ]
+    },
+    {
+      "id": "GCR-003",
+      "domain": "Workspace: Classroom",
+      "name": "Users can authorise apps to access Classroom data",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Data access: untick \"Allow users to authorize apps to access Classroom data\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.2.1v1"
+      ]
+    },
+    {
+      "id": "GCR-004",
+      "domain": "Workspace: Classroom",
+      "name": "Roster import is enabled",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Roster import: choose \"Off\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.3.1v1"
+      ]
+    },
+    {
+      "id": "GCR-005",
+      "domain": "Workspace: Classroom",
+      "name": "Students can unenrol other students",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Student unenrollment: choose \"Only teachers\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.4.1v1"
+      ]
+    },
+    {
+      "id": "GCR-006",
+      "domain": "Workspace: Classroom",
+      "name": "Anyone can create classes",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Classroom > Teacher permissions: choose \"Verified teachers only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CLASSROOM.5.1v1"
+      ]
+    },
+    {
       "id": "GDR-001",
       "domain": "Workspace: Drive and Docs",
       "name": "Files can be shared with anyone outside the organisation",
@@ -1739,6 +1835,22 @@
       "source": "workspace",
       "scuba": [
         "GWS.MEET.5.2v1"
+      ]
+    },
+    {
+      "id": "GST-001",
+      "domain": "Workspace: Sites",
+      "name": "Google Sites is enabled for users",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Sites: set the service status to \"OFF for everyone\" if the organisation does not need Sites."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.SITES.1.1v1"
       ]
     },
     {

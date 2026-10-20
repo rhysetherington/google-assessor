@@ -160,6 +160,14 @@ def healthy_settings() -> "dict[str, Any]":
         "chat.chat_file_sharing": {"externalFileSharing": "NO_FILES", "internalFileSharing": "ALL_FILES"},
         "chat.space_history": {"historyState": "HISTORY_ALWAYS_ON"},
         "chat.external_chat_restriction": {"allowExternalChat": True, "externalChatRestriction": "TRUSTED_DOMAINS"},
+        # --- Classroom and Sites ---
+        "classroom.service_status": {"serviceState": "ENABLED"},
+        "classroom.class_membership": {"whoCanJoinClasses": "ANYONE_IN_DOMAIN", "whichClassesCanUsersJoin": "CLASSES_IN_DOMAIN"},
+        "classroom.api_data_access": {"enableApiAccess": False},
+        "classroom.roster_import": {"rosterImportOption": "OFF"},
+        "classroom.student_unenrollment": {"whoCanUnenrollStudents": "TEACHERS_ONLY"},
+        "classroom.teacher_permissions": {"whoCanCreateClasses": "VERIFIED_TEACHERS_ONLY"},
+        "sites.service_status": {"serviceState": "DISABLED"},
     }
 
 

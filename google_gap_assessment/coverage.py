@@ -10,9 +10,12 @@ import sys
 from itertools import groupby
 from pathlib import Path
 
+import json
+
 from .model import CONTROL_MAPPING
 
 OUT = Path(__file__).resolve().parent.parent / "Docs" / "Coverage.md"
+SCUBA = Path(__file__).parent / "data" / "scuba_policies.json"
 
 
 def _table(controls: "list[dict]", workspace: bool) -> "list[str]":
@@ -41,7 +44,13 @@ def render() -> str:
         for domain, items in groupby(sorted(group, key=lambda c: (c["domain"], c["id"])), key=lambda c: c["domain"]):
             lines += ["", f"### {domain}"] + _table(list(items), source == "workspace")
         lines.append("")
-    lines += ["## Not covered yet", "",
+    scuba = json.loads(SCUBA.read_text(encoding="utf-8"))
+    covered = {ref.removesuffix("v1") for c in controls for ref in c.get("scuba", [])}
+    lines += [f"## CISA SCuBA coverage ({len(covered)} of {len(scuba['policies'])} policies)", "",
+              "Every Workspace baseline policy that is not covered, and why. The reasons: " + "; ".join(f"**{k}** = {v}" for k, v in scuba["reasons"].items()) + ".", "",
+              "| Policy | Reason | Note |", "|---|---|---|"]
+    lines += [f"| {pid.removeprefix('GWS.')} | {info['reason']} | {info['note']} |" for pid, info in scuba["not_covered"].items()]
+    lines += ["", "## Not covered yet", "",
               "- Google Cloud: IAM policies, audit configuration and log sinks set on a folder or the organisation are not visible from a project.",
               "- Google Cloud: BigQuery dataset access, GKE cluster hardening, Cloud Functions / Cloud Run exposure, VPC Service Controls, Security Command Center "
               "findings, and the CIS log-metric alert recommendations (2.4 to 2.11).",

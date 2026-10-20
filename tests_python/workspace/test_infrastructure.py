@@ -90,7 +90,7 @@ class Errors(unittest.TestCase):
         self.assertEqual([2, 7.0], sleeps)
 
     def test_gives_up_after_the_retry_limit_and_permission_errors_are_not_retried(self):
-        c, _, sleeps = client(*[http_error(429, {"error": {}})] * 3, max_retries=2)
+        c, _, sleeps = client(*[http_error(429, {"error": {}}) for _ in range(3)], max_retries=2)  # three distinct responses: each is closed after use
         with self.assertRaises(ApiError) as cm:
             c.get("https://admin.googleapis.com/x")
         self.assertEqual("Transient", cm.exception.category)
