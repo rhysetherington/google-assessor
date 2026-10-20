@@ -32,3 +32,40 @@ def healthy_passes(test: unittest.TestCase, module) -> None:
     test.assertGreater(len(findings), 0)
     test.assertEqual([], [f"{f['FindingId']}={f['Status']}: {f['Detail']}" for f in findings if f["Status"] != "Pass"])
     test.assertGreater(len(ctx.client.requests), 0)
+
+
+# --- small mutations used by the per-domain tests ------------------------------------------------------------------------------
+
+def setting(name, **fields):
+    """Change fields of a top-level setting."""
+    return lambda t: t.settings.__setitem__(name, {**t.settings.get(name, {}), **fields})
+
+
+def drop(name):
+    """Remove a setting entirely (so only Google's documented default, if any, remains)."""
+    return lambda t: t.settings.pop(name)
+
+
+def replace(name, value):
+    return lambda t: t.settings.__setitem__(name, value)
+
+
+def both(*fns):
+    def mutate(t):
+        for f in fns:
+            f(t)
+    return mutate
+
+
+def off(service):
+    """Switch a product off for the whole tenant."""
+    return replace(service, {"serviceState": "DISABLED"})
+
+
+def override(ou, name, value, group=None):
+    return lambda t: t.override(ou, name, value, group=group)
+
+
+def coverage_test(test, module, cases):
+    """Every check of the module has at least one case that makes it report a gap."""
+    test.assertEqual({chk.id for chk in module.CHECKS}, {c[1] for c in cases if c[2] == "Gap"})

@@ -128,6 +128,484 @@
       "source": "cloud"
     },
     {
+      "id": "GCH-001",
+      "domain": "Workspace: Chat",
+      "name": "Chat history is not on by default",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > History for chats: set \"Chat conversations are saved by default\" / \"History is on\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.1.1v1"
+      ]
+    },
+    {
+      "id": "GCH-002",
+      "domain": "Workspace: Chat",
+      "name": "Users can change their chat history setting",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > History for chats: untick \"Allow users to change their history setting\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.1.2v1"
+      ]
+    },
+    {
+      "id": "GCH-003",
+      "domain": "Workspace: Chat",
+      "name": "Files can be shared with people outside the organisation in Chat",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > Chat file sharing: set \"External filesharing\" to \"No files\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.2.1v1"
+      ]
+    },
+    {
+      "id": "GCH-004",
+      "domain": "Workspace: Chat",
+      "name": "Space history is not always on",
+      "severity": "Low",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > Space history: choose \"Always on\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.3.1v1"
+      ]
+    },
+    {
+      "id": "GCH-005",
+      "domain": "Workspace: Chat",
+      "name": "External chat is not limited to allowlisted domains",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Chat > External chat settings: turn external chat off, or tick \"Allow users to send messages to external users\" and \"Only allow this for allowlisted domains\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CHAT.4.1v1"
+      ]
+    },
+    {
+      "id": "GCL-001",
+      "domain": "Workspace: Calendar",
+      "name": "Primary calendars show outsiders more than free/busy",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Sharing settings > External sharing options for primary calendars: choose \"Only free/busy information (hide event details)\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.1.1v1"
+      ]
+    },
+    {
+      "id": "GCL-002",
+      "domain": "Workspace: Calendar",
+      "name": "Secondary calendars show outsiders more than free/busy",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Sharing settings > External sharing options for secondary calendars: choose \"Only free/busy information (hide event details)\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.1.2v1"
+      ]
+    },
+    {
+      "id": "GCL-003",
+      "domain": "Workspace: Calendar",
+      "name": "Users are not warned when inviting people outside the organisation",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Sharing settings > External invitations: tick \"Warn users when inviting guests outside of the domain\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.2.1v1"
+      ]
+    },
+    {
+      "id": "GCL-004",
+      "domain": "Workspace: Calendar",
+      "name": "Calendar interoperability is enabled",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Advanced settings > Calendar interop: untick \"Enable Calendar Interop\" unless a migration needs it, and use Graph API authentication when it does."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.3.1v1"
+      ]
+    },
+    {
+      "id": "GCL-005",
+      "domain": "Workspace: Calendar",
+      "name": "Appointment schedules can take payments",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Calendar > Advanced settings > Appointment schedules: untick \"Allow appointment schedules with payments\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.CALENDAR.4.1v1"
+      ]
+    },
+    {
+      "id": "GDR-001",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Files can be shared with anyone outside the organisation",
+      "severity": "High",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Sharing options: set \"Sharing outside of <org>\" to \"OFF\" or \"ALLOWLISTED DOMAINS\" and manage the allowlist."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.1v1"
+      ]
+    },
+    {
+      "id": "GDR-002",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users can receive files from outside the sharing boundary",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: untick \"Allow users in <org> to receive files from users or shared drives outside of <org>\" (or the allowlisted-domains equivalent)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.2v1"
+      ]
+    },
+    {
+      "id": "GDR-003",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users are not warned before sharing outside the organisation",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: tick \"When sharing outside of <org> is allowed, users in <org> see a warning prompt\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.3v1"
+      ]
+    },
+    {
+      "id": "GDR-004",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users can invite people without Google accounts",
+      "severity": "Medium",
+      "scf": "IAC-02",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: untick \"Allow users to invite people outside <org> who are not using a Google account to view files\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.4v1"
+      ]
+    },
+    {
+      "id": "GDR-005",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Users can publish files to the web",
+      "severity": "High",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings: untick \"When sharing outside of <org> is allowed, users can publish files on the web or make visible to the world as public or unlisted\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.5v1"
+      ]
+    },
+    {
+      "id": "GDR-006",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Access-checker suggestions offer wider audiences than the recipients",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Access Checker: choose \"Recipients only\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.6v1"
+      ]
+    },
+    {
+      "id": "GDR-007",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Content can be distributed to shared drives outside the organisation",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Distributing content outside of <org>: choose \"None\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.7v1"
+      ]
+    },
+    {
+      "id": "GDR-008",
+      "domain": "Workspace: Drive and Docs",
+      "name": "New files are shared by link by default",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > General access default: choose \"Private to the owner\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.8v1"
+      ]
+    },
+    {
+      "id": "GDR-009",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Files from outside the organisation are not highlighted",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Sharing settings > Warning for external files: tick \"Highlight files that come from outside <org>\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.1.9v1"
+      ]
+    },
+    {
+      "id": "GDR-010",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Shared drive managers can override sharing settings",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Shared drive creation: untick \"Allow members with manager access to override the settings below\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.2.1v1"
+      ]
+    },
+    {
+      "id": "GDR-011",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Shared drives can be shared with people outside the organisation",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Shared drive creation: untick \"Allow people outside <org> to access files in shared drives\"."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GDR-012",
+      "domain": "Workspace: Drive and Docs",
+      "name": "The Drive link-security update is not applied or users can remove it",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Security update for shared links: choose \"Apply security update to all impacted files\" and untick \"Allow users to remove/apply the security update\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.3.1v1"
+      ]
+    },
+    {
+      "id": "GDR-013",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Drive SDK access is enabled",
+      "severity": "Medium",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Features and Applications: untick \"Allow users to access Google Drive with the Drive SDK API\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.4.1v1"
+      ]
+    },
+    {
+      "id": "GDR-014",
+      "domain": "Workspace: Drive and Docs",
+      "name": "Drive for desktop is not limited to authorised devices",
+      "severity": "Medium",
+      "scf": "END-01",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Drive and Docs > Features and Applications > Drive for desktop: tick \"Only allow Google Drive for desktop on authorized devices\" (or turn Drive for desktop off)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.DRIVEDOCS.5.1v1"
+      ]
+    },
+    {
+      "id": "GGR-001",
+      "domain": "Workspace: Groups",
+      "name": "Groups can be accessed from outside the organisation",
+      "severity": "Medium",
+      "scf": "DCH-14",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings > Accessing groups from outside this organization: turn it off (owners can then opt individual groups in)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.1.1v1"
+      ]
+    },
+    {
+      "id": "GGR-002",
+      "domain": "Workspace: Groups",
+      "name": "Group owners can add external members",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings: untick \"Group owners can allow members outside your domain\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.1.2v1"
+      ]
+    },
+    {
+      "id": "GGR-003",
+      "domain": "Workspace: Groups",
+      "name": "Group owners can let the public post to a group",
+      "severity": "Low",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings: untick \"Group owners can allow incoming email from outside the organization\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.1.3v1"
+      ]
+    },
+    {
+      "id": "GGR-004",
+      "domain": "Workspace: Groups",
+      "name": "Anyone in the organisation can create groups",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings > Creating groups: choose \"Only organization admins can create groups\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.2.1v1"
+      ]
+    },
+    {
+      "id": "GGR-005",
+      "domain": "Workspace: Groups",
+      "name": "Conversations are visible to more than group members by default",
+      "severity": "Low",
+      "scf": "DCH-14",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings > Default for permission to view conversations: choose \"Group members\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.3.1v1"
+      ]
+    },
+    {
+      "id": "GGR-006",
+      "domain": "Workspace: Groups",
+      "name": "Groups can be hidden from the directory",
+      "severity": "Low",
+      "scf": "AST-02",
+      "nistCsf": "ID.AM-02",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Groups for Business > Sharing settings: untick \"Group owners can hide groups from the Groups list\" and \"New groups are hidden from the Groups list by default\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GROUPS.4.1v1"
+      ]
+    },
+    {
       "id": "GID-001",
       "domain": "Workspace: Identity and access",
       "name": "2-step verification is not enforced",
@@ -1165,6 +1643,102 @@
       "source": "workspace",
       "scuba": [
         "GWS.GMAIL.18.3v1"
+      ]
+    },
+    {
+      "id": "GMT-001",
+      "domain": "Workspace: Meet",
+      "name": "Outsiders who were not invited can join meetings without asking",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > Access: set \"Meeting access\" so uninvited external users must ask to join."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.1.1v1"
+      ]
+    },
+    {
+      "id": "GMT-002",
+      "domain": "Workspace: Meet",
+      "name": "Users can join meetings created outside any Workspace organisation",
+      "severity": "Medium",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > Access: choose \"Users can join only meetings created by Workspace organizations\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.2.1v1"
+      ]
+    },
+    {
+      "id": "GMT-003",
+      "domain": "Workspace: Meet",
+      "name": "Host management features are off",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > Host management: tick \"Host management\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.3.1v1"
+      ]
+    },
+    {
+      "id": "GMT-004",
+      "domain": "Workspace: Meet",
+      "name": "External participants are not labelled",
+      "severity": "Low",
+      "scf": "IAC-20",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet safety settings > External participants: tick \"Warn for external participants\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.4.1v1"
+      ]
+    },
+    {
+      "id": "GMT-005",
+      "domain": "Workspace: Meet",
+      "name": "Meetings are recorded automatically",
+      "severity": "Low",
+      "scf": "DCH-01",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet video settings: untick \"Recordings will be automatically on\" (leave recording available to hosts)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.5.1v1"
+      ]
+    },
+    {
+      "id": "GMT-006",
+      "domain": "Workspace: Meet",
+      "name": "Meetings are transcribed automatically",
+      "severity": "Low",
+      "scf": "DCH-01",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Google Meet > Meet video settings: untick \"Transcripts will be automatically on\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.MEET.5.2v1"
       ]
     },
     {

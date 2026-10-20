@@ -1,10 +1,49 @@
 # Coverage
 
-Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. 112 checks.
+Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. 148 checks.
 
-## Google Workspace (65 checks)
+## Google Workspace (101 checks)
 
 SCuBA references are the CISA Secure Cloud Business Applications baseline policies each check covers (`COMMONCONTROLS.5.2` is `GWS.COMMONCONTROLS.5.2v1`); a check with `-` is an addition of our own.
+
+### Workspace: Calendar
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GCL-001 | Primary calendars show outsiders more than free/busy | Medium | CALENDAR.1.1 | PR.DS-01 | DCH-14 |
+| GCL-002 | Secondary calendars show outsiders more than free/busy | Medium | CALENDAR.1.2 | PR.DS-01 | DCH-14 |
+| GCL-003 | Users are not warned when inviting people outside the organisation | Low | CALENDAR.2.1 | PR.DS-01 | DCH-14 |
+| GCL-004 | Calendar interoperability is enabled | Low | CALENDAR.3.1 | PR.PS-01 | CFG-03 |
+| GCL-005 | Appointment schedules can take payments | Low | CALENDAR.4.1 | PR.PS-01 | CFG-03 |
+
+### Workspace: Chat
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GCH-001 | Chat history is not on by default | Medium | CHAT.1.1 | PR.PS-04 | MON-10 |
+| GCH-002 | Users can change their chat history setting | Medium | CHAT.1.2 | PR.PS-04 | MON-10 |
+| GCH-003 | Files can be shared with people outside the organisation in Chat | Medium | CHAT.2.1 | PR.DS-01 | DCH-14 |
+| GCH-004 | Space history is not always on | Low | CHAT.3.1 | PR.PS-04 | MON-10 |
+| GCH-005 | External chat is not limited to allowlisted domains | Medium | CHAT.4.1 | PR.IR-01 | NET-12 |
+
+### Workspace: Drive and Docs
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GDR-001 | Files can be shared with anyone outside the organisation | High | DRIVEDOCS.1.1 | PR.DS-01 | DCH-14 |
+| GDR-002 | Users can receive files from outside the sharing boundary | Medium | DRIVEDOCS.1.2 | PR.DS-01 | DCH-14 |
+| GDR-003 | Users are not warned before sharing outside the organisation | Low | DRIVEDOCS.1.3 | PR.DS-01 | DCH-14 |
+| GDR-004 | Users can invite people without Google accounts | Medium | DRIVEDOCS.1.4 | PR.AA-03 | IAC-02 |
+| GDR-005 | Users can publish files to the web | High | DRIVEDOCS.1.5 | PR.DS-01 | DCH-14 |
+| GDR-006 | Access-checker suggestions offer wider audiences than the recipients | Low | DRIVEDOCS.1.6 | PR.DS-01 | DCH-14 |
+| GDR-007 | Content can be distributed to shared drives outside the organisation | Medium | DRIVEDOCS.1.7 | PR.DS-01 | DCH-14 |
+| GDR-008 | New files are shared by link by default | Medium | DRIVEDOCS.1.8 | PR.DS-01 | DCH-14 |
+| GDR-009 | Files from outside the organisation are not highlighted | Low | DRIVEDOCS.1.9 | PR.DS-01 | DCH-14 |
+| GDR-010 | Shared drive managers can override sharing settings | Medium | DRIVEDOCS.2.1 | PR.AA-05 | IAC-20 |
+| GDR-011 | Shared drives can be shared with people outside the organisation | Medium | - | PR.DS-01 | DCH-14 |
+| GDR-012 | The Drive link-security update is not applied or users can remove it | Medium | DRIVEDOCS.3.1 | PR.DS-01 | DCH-14 |
+| GDR-013 | Drive SDK access is enabled | Medium | DRIVEDOCS.4.1 | PR.PS-01 | CFG-03 |
+| GDR-014 | Drive for desktop is not limited to authorised devices | Medium | DRIVEDOCS.5.1 | PR.PS-01 | END-01 |
 
 ### Workspace: Gmail and email security
 
@@ -45,6 +84,17 @@ SCuBA references are the CISA Secure Cloud Business Applications baseline polici
 | GML-033 | Spam-filter override (allowlist) rules exist | Medium | GMAIL.18.1, GMAIL.18.2 | PR.IR-01 | NET-12 |
 | GML-034 | A rule hides warning banners for all senders on a list | Medium | GMAIL.18.3 | PR.IR-01 | NET-12 |
 
+### Workspace: Groups
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GGR-001 | Groups can be accessed from outside the organisation | Medium | GROUPS.1.1 | PR.AA-05 | DCH-14 |
+| GGR-002 | Group owners can add external members | Medium | GROUPS.1.2 | PR.AA-05 | IAC-20 |
+| GGR-003 | Group owners can let the public post to a group | Low | GROUPS.1.3 | PR.IR-01 | NET-12 |
+| GGR-004 | Anyone in the organisation can create groups | Low | GROUPS.2.1 | PR.AA-05 | IAC-20 |
+| GGR-005 | Conversations are visible to more than group members by default | Low | GROUPS.3.1 | PR.DS-01 | DCH-14 |
+| GGR-006 | Groups can be hidden from the directory | Low | GROUPS.4.1 | ID.AM-02 | AST-02 |
+
 ### Workspace: Identity and access
 
 | ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
@@ -80,6 +130,17 @@ SCuBA references are the CISA Secure Cloud Business Applications baseline polici
 | GID-029 | Data is not processed only in its storage region | Low | COMMONCONTROLS.15.2 | PR.DS-01 | DCH-01 |
 | GID-030 | Multi-party approval is not enabled for sensitive admin changes | Medium | COMMONCONTROLS.17.1 | PR.AA-05 | IAC-21 |
 | GID-031 | No active data-loss-prevention rules | Medium | COMMONCONTROLS.18.1, COMMONCONTROLS.18.2 | PR.DS-01 | DCH-01 |
+
+### Workspace: Meet
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GMT-001 | Outsiders who were not invited can join meetings without asking | Medium | MEET.1.1 | PR.AA-05 | IAC-20 |
+| GMT-002 | Users can join meetings created outside any Workspace organisation | Medium | MEET.2.1 | PR.AA-05 | IAC-20 |
+| GMT-003 | Host management features are off | Low | MEET.3.1 | PR.AA-05 | IAC-20 |
+| GMT-004 | External participants are not labelled | Low | MEET.4.1 | PR.AA-05 | IAC-20 |
+| GMT-005 | Meetings are recorded automatically | Low | MEET.5.1 | PR.DS-01 | DCH-01 |
+| GMT-006 | Meetings are transcribed automatically | Low | MEET.5.2 | PR.DS-01 | DCH-01 |
 
 ## Google Cloud (47 checks)
 

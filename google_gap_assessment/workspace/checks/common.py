@@ -75,7 +75,7 @@ def policy_result(ctx: WsContext, tenant: str, finding_id: str, setting: str, ok
         return [ProjectResult(tenant, finding_id, "NotAssessed", [], f"Google returned no value for settings/{setting}. "
                               "The tenant's edition may not include it, or the signed-in admin cannot read it.")]
     if verdict.unreadable_field:
-        return [ProjectResult(tenant, finding_id, "NotAssessed", [], f"settings/{setting} was returned without the field this check needs.")]
+        return [ProjectResult(tenant, finding_id, "NotAssessed", [], f"settings/{setting} was returned without a value this check can interpret (the field is missing, or is a value whose meaning is not documented). Check it in the Admin console.")]
     return [gap_or_pass(tenant, finding_id, [f"{tenant}: {scope} - {describe(value)}" for scope, value in verdict.bad], detail)]
 
 

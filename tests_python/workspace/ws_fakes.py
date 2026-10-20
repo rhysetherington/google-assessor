@@ -121,6 +121,45 @@ def healthy_settings() -> "dict[str, Any]":
         "gmail.comprehensive_mail_storage": {"ruleId": "rule-1"},
         "gmail.rule_states": {"ruleStates": [{"ruleId": "rule-1", "enabled": True}]},
         "gmail.spam_override_lists": {"spamOverride": []},
+        # --- Drive and Docs ---
+        "drive_and_docs.service_status": {"serviceState": "ENABLED"},
+        "drive_and_docs.external_sharing": {"externalSharingMode": "ALLOWLISTED_DOMAINS", "accessCheckerSuggestions": "RECIPIENTS_ONLY",
+                                            "allowNonGoogleInvites": False, "allowNonGoogleInvitesInAllowlistedDomains": False, "allowPublishingFiles": False,
+                                            "allowReceivingExternalFiles": False, "allowReceivingFilesOutsideAllowlistedDomains": False,
+                                            "allowedPartiesForDistributingContent": "NONE", "warnForExternalSharing": True,
+                                            "warnForSharingOutsideAllowlistedDomains": True},
+        "drive_and_docs.general_access_default": {"defaultFileAccess": "PRIVATE_TO_OWNER"},
+        "drive_and_docs.external_file_warning": {"highlightingEnabled": True},
+        "drive_and_docs.shared_drive_creation": {"allowManagersToOverrideSettings": False, "allowExternalUserAccess": False, "allowNonMemberAccess": True},
+        "drive_and_docs.file_security_update": {"securityUpdate": "APPLY_TO_IMPACTED_FILES", "allowUsersToManageUpdate": False},
+        "drive_and_docs.drive_sdk": {"enableDriveSdkApiAccess": False},
+        "drive_and_docs.drive_for_desktop": {"allowDriveForDesktop": True, "restrictToAuthorizedDevices": True},
+        # --- Groups ---
+        "groups_for_business.service_status": {"serviceState": "ENABLED"},
+        "groups_for_business.groups_sharing": {"collaborationCapability": "DOMAIN_USERS_ONLY", "createGroupsAccessLevel": "ADMIN_ONLY", "newGroupsAreHidden": False,
+                                               "ownersCanAllowExternalMembers": False, "ownersCanAllowIncomingMailFromPublic": False, "ownersCanHideGroups": False,
+                                               "viewTopicsDefaultAccessLevel": "GROUP_MEMBERS"},
+        # --- Meet ---
+        "meet.service_status": {"serviceState": "ENABLED"},
+        "meet.meet_joining": {"allowedAudience": "TRUSTED"},
+        "meet.safety_access": {"meetingsAllowedToJoin": "SAME_ORGANIZATION_ONLY"},
+        "meet.safety_host_management": {"enableHostManagement": True},
+        "meet.safety_external_participants": {"enableExternalLabel": True},
+        "meet.automatic_recording": {"enabled": False},
+        "meet.automatic_transcription": {"enabled": False},
+        # --- Calendar ---
+        "calendar.service_status": {"serviceState": "ENABLED"},
+        "calendar.primary_calendar_max_allowed_external_sharing": {"maxAllowedExternalSharing": "EXTERNAL_FREE_BUSY_ONLY"},
+        "calendar.secondary_calendar_max_allowed_external_sharing": {"maxAllowedExternalSharing": "EXTERNAL_FREE_BUSY_ONLY"},
+        "calendar.external_invitations": {"warnOnInvite": True},
+        "calendar.interoperability": {"enableInteroperability": False},
+        "calendar.appointment_schedules": {"enablePayments": False},
+        # --- Chat ---
+        "chat.service_status": {"serviceState": "ENABLED"},
+        "chat.chat_history": {"historyOnByDefault": True, "allowUserModification": False},
+        "chat.chat_file_sharing": {"externalFileSharing": "NO_FILES", "internalFileSharing": "ALL_FILES"},
+        "chat.space_history": {"historyState": "HISTORY_ALWAYS_ON"},
+        "chat.external_chat_restriction": {"allowExternalChat": True, "externalChatRestriction": "TRUSTED_DOMAINS"},
     }
 
 
