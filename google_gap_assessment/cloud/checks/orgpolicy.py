@@ -92,6 +92,7 @@ def _make_check(finding_id: str, constraint: str, kind: str, why: str) -> Check:
 
 
 CHECKS: list = [_make_check(*row) for row in CHECKS_TABLE]
+DOMAIN_NAME = "Organization policy"   # the name the control mapping and reports use for this domain
 
 
 def collect(ctx: Context, projects: "list[str]", only=None) -> "list[dict]":

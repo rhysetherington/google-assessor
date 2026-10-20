@@ -7,6 +7,7 @@ from .common import Context, registrar, run_checks
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Cloud SQL"   # the name the control mapping and reports use for this domain
 
 
 def _instances(ctx: Context, project: str) -> "list[dict]":

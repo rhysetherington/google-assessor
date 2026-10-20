@@ -96,6 +96,43 @@ def healthy_settings() -> "dict[str, Any]":
         "data_regions.data_processing_region": {"limitToStorageRegion": True},
         "multi_party_approval.require_approvals": {"multiPartyApprovalState": "ENABLED"},
         "rule.dlp": [{"displayName": "Block card numbers", "state": "ACTIVE", "triggers": ["google.workspace.drive.file.v1.share"]}],
+        # --- Gmail ---
+        "gmail.service_status": {"serviceState": "ENABLED"},
+        "gmail.mail_delegation": {"enableMailDelegation": False},
+        "gmail.email_attachment_safety": {"enableEncryptedAttachmentProtection": True, "enableAttachmentWithScriptsProtection": True,
+                                          "enableAnomalousAttachmentProtection": True, "applyFutureRecommendedSettingsAutomatically": True,
+                                          "encryptedAttachmentProtectionConsequence": "QUARANTINE", "attachmentWithScriptsProtectionConsequence": "SPAM_FOLDER",
+                                          "anomalousAttachmentProtectionConsequence": "QUARANTINE"},
+        "gmail.links_and_external_images": {"enableShortenerScanning": True, "enableExternalImageScanning": True,
+                                            "enableAggressiveWarningsOnUntrustedLinks": True, "applyFutureSettingsAutomatically": True},
+        "gmail.spoofing_and_authentication": {"detectDomainNameSpoofing": True, "detectEmployeeNameSpoofing": True,
+                                              "detectDomainSpoofingFromUnauthenticatedSenders": True, "detectUnauthenticatedEmails": True,
+                                              "applyFutureSettingsAutomatically": True, "domainSpoofingConsequence": "QUARANTINE",
+                                              "domainNameSpoofingConsequence": "QUARANTINE", "employeeNameSpoofingConsequence": "SPAM_FOLDER",
+                                              "unauthenticatedEmailConsequence": "SPAM_FOLDER"},
+        "gmail.user_email_uploads": {"enableMailAndContactsImport": False},
+        "gmail.pop_access": {"enablePopAccess": False},
+        "gmail.imap_access": {"enableImapAccess": False},
+        "gmail.workspace_sync_for_outlook": {"enableGoogleWorkspaceSyncForMicrosoftOutlook": False},
+        "gmail.auto_forwarding": {"enableAutoForwarding": False},
+        "gmail.per_user_outbound_gateway": {"allowUsersToUseExternalSmtpServers": False},
+        "gmail.email_spam_filter_ip_allowlist": {"allowedIpAddresses": []},
+        "gmail.enhanced_pre_delivery_message_scanning": {"enableImprovedSuspiciousContentDetection": True},
+        "gmail.comprehensive_mail_storage": {"ruleId": "rule-1"},
+        "gmail.rule_states": {"ruleStates": [{"ruleId": "rule-1", "enabled": True}]},
+        "gmail.spam_override_lists": {"spamOverride": []},
+    }
+
+
+def healthy_dns(domain: str = TENANT) -> "dict[str, Any]":
+    """DNS for a domain with hard-fail SPF, a DKIM key, DMARC reject with reporting, MTA-STS and TLS-RPT."""
+    key = "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtestkeytestkeytestkeytestkey"
+    return {
+        domain: ["v=spf1 include:_spf.google.com -all", "google-site-verification=abc"],
+        f"google._domainkey.{domain}": [key],
+        f"_dmarc.{domain}": [f"v=DMARC1; p=reject; sp=reject; rua=mailto:dmarc@{domain}; fo=1"],
+        f"_mta-sts.{domain}": ["v=STSv1; id=20260101"],
+        f"_smtp._tls.{domain}": [f"v=TLSRPTv1; rua=mailto:tls@{domain}"],
     }
 
 
@@ -119,7 +156,7 @@ class Tenant:
         self.domains = [{"domainName": TENANT, "isPrimary": True, "verified": True, "domainAliases": []}]
         self.sso: "list[dict]" = []
         self.errors: "dict[str, Err]" = {}          # route URL -> error
-        self.dns: "dict[str, Any]" = {}
+        self.dns: "dict[str, Any]" = healthy_dns()
 
     # -- building ------------------------------------------------------------------------------------------------------
     def _raw_policies(self) -> "list[dict]":
@@ -155,7 +192,7 @@ class Tenant:
     def context(self, options: "WsOptions | None" = None) -> WsContext:
         client = FakeWorkspace(self.routes())
         resolver = FakeResolver(self.dns)
-        return WsContext(client=client, directory=Directory(client), resolver=resolver, options=options or WsOptions(), clock=lambda: NOW)
+        return WsContext(client=client, directory=Directory(client), resolver=resolver, domains=[d['domainName'] for d in self.domains], options=options or WsOptions(), clock=lambda: NOW)
 
     # -- mutation helpers ----------------------------------------------------------------------------------------------
     def override(self, ou_path: str, setting: str, value: Any, group: "str | None" = None, order: int = 0) -> None:

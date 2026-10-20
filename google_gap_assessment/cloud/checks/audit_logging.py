@@ -11,6 +11,7 @@ from .common import Context, has_items, registrar, run_checks
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Logging and monitoring"   # the name the control mapping and reports use for this domain
 
 
 def bucket_retention(bucket: dict) -> "tuple[bool, bool | None]":

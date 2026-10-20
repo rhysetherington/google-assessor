@@ -10,6 +10,7 @@ from .common import Context, leaf, registrar, run_checks, service_account_kind
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Compute Engine"   # the name the control mapping and reports use for this domain
 
 FULL_ACCESS_SCOPE = "https://www.googleapis.com/auth/cloud-platform"
 GKE_NOTE = "instances created by GKE are excluded"

@@ -12,6 +12,7 @@ from .common import Context, has_items, leaf, registrar, run_checks
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Networking"   # the name the control mapping and reports use for this domain
 
 FIREWALL_NOTE = "Rule priority, deny rules and hierarchical firewall policies are not evaluated."
 

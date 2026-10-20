@@ -2,7 +2,7 @@
 
 A **read-only** Google Cloud security gap assessment you can run against your own projects with the
 [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) (`gcloud`). It reads your configuration, compares it with
-**78 checks** across IAM, logging, networking, Compute Engine, Cloud Storage, Cloud SQL, Cloud KMS and organization policy, and produces a
+**112 checks** across IAM, logging, networking, Compute Engine, Cloud Storage, Cloud SQL, Cloud KMS and organization policy, and produces a
 scored report (HTML, Markdown and JSON) with remediation steps. Every check is mapped to SCF and NIST CSF 2.0 and, where it matches, to the
 CIS Google Cloud Platform Foundation Benchmark. It is the Google Cloud sibling of the M365 Assessor and produces the same kind of report.
 

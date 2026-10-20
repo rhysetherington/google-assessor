@@ -130,7 +130,8 @@ def merge_results(finding_id: str, results: "Iterable[ProjectResult]") -> dict:
         shown = "; ".join(f"{r.project} ({r.detail})" for r in na[:5]) + ("; ..." if len(na) > 5 else "")
         lines.append(f"Could not be assessed in {len(na)} project(s): {shown}")
     if not_applicable:
-        lines.append("Not applicable (service not enabled) in: " + ", ".join(dict.fromkeys(r.project for r in not_applicable))[:300])
+        reasons = "; ".join(dict.fromkeys(r.detail for r in not_applicable if r.detail))
+        lines.append("Not applicable in: " + ", ".join(dict.fromkeys(r.project for r in not_applicable))[:300] + (f" ({reasons})" if reasons else ""))
     affected = [a for r in gap for a in r.affected]
     return new_finding(finding_id, status, affected, " ".join(lines))
 

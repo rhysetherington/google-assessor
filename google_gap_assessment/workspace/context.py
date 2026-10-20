@@ -26,6 +26,7 @@ class WsContext:
     client: WorkspaceClient
     directory: Directory
     resolver: Optional[DohResolver] = None
+    domains: "list[str]" = field(default_factory=list)   # primary + verified secondary domains + aliases; email authentication is checked for each
     options: WsOptions = field(default_factory=WsOptions)
     clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc)   # injectable so tests can fix "now"
     _policies: "Optional[PolicySet]" = None

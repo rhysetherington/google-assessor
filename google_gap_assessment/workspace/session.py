@@ -71,5 +71,5 @@ def connect_workspace(quota_project: Optional[str] = None, doh_endpoint: str = D
 
     ws_options = options or WsOptions(check_dns=check_dns)
     ws_options.check_dns = check_dns and ws_options.check_dns
-    ctx = WsContext(client=http, directory=directory, resolver=(resolver or (DohResolver(doh_endpoint) if ws_options.check_dns else None)), options=ws_options)
+    ctx = WsContext(client=http, directory=directory, domains=unique, resolver=(resolver or (DohResolver(doh_endpoint) if ws_options.check_dns else None)), options=ws_options)
     return WsSession(ctx=ctx, customer_id=str(customer.get("id", "")), primary_domain=primary, domains=unique, account=str(info.get("email") or "unknown"))

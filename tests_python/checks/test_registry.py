@@ -11,7 +11,6 @@ from google_gap_assessment.cloud.checks.common import Context
 from google_gap_assessment.model import CONTROL_MAPPING, Options
 from tests_python.fakes import PROJECT, FakeGcloud, add_binding, healthy
 
-PREFIX = {"Iam": "IAM", "Audit": "LOG", "Network": "NET", "Compute": "CMP", "Storage": "STO", "Sql": "SQL", "Kms": "KMS", "OrgPolicy": "ORG"}
 
 
 class Registry(unittest.TestCase):
@@ -32,12 +31,16 @@ class Registry(unittest.TestCase):
                     self.assertTrue((c.run.__doc__ or "").strip(), f"{c.id} ({domain}) needs a docstring saying what it checks")
 
     def test_mapping_domain_names_match_the_module(self):
-        names = {"Iam": "Identity and IAM", "Logging": "Logging and monitoring", "Network": "Networking", "Compute": "Compute Engine",
-                 "Storage": "Cloud Storage", "Sql": "Cloud SQL", "Kms": "Cloud KMS", "OrgPolicy": "Organization policy",
-                 "Identity": "Workspace: Identity and access"}
-        for cid, domain in CHECK_INDEX.items():
-            with self.subTest(cid):
-                self.assertEqual(names[domain], CONTROL_MAPPING[cid]["domain"])
+        for domain, module in DOMAINS.items():
+            for chk in module.CHECKS:
+                with self.subTest(chk.id):
+                    self.assertEqual(module.DOMAIN_NAME, CONTROL_MAPPING[chk.id]["domain"])
+
+    def test_mapping_source_matches_the_target(self):
+        from google_gap_assessment.assess import CLOUD_DOMAINS, WORKSPACE_DOMAINS
+        for chk_id, domain in CHECK_INDEX.items():
+            with self.subTest(chk_id):
+                self.assertEqual("workspace" if domain in WORKSPACE_DOMAINS else "cloud", CONTROL_MAPPING[chk_id]["source"])
 
 
 class RedoOneCheck(unittest.TestCase):

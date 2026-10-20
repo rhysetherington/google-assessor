@@ -1,10 +1,49 @@
 # Coverage
 
-Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. 78 checks.
+Generated from `google_gap_assessment/data/control_mapping.json` by `python3 -m google_gap_assessment.coverage`; do not edit by hand. 112 checks.
 
-## Google Workspace (31 checks)
+## Google Workspace (65 checks)
 
 SCuBA references are the CISA Secure Cloud Business Applications baseline policies each check covers (`COMMONCONTROLS.5.2` is `GWS.COMMONCONTROLS.5.2v1`); a check with `-` is an addition of our own.
+
+### Workspace: Gmail and email security
+
+| ID | Check | Severity | CISA SCuBA | NIST CSF 2.0 | SCF |
+|---|---|---|---|---|---|
+| GML-001 | Mailbox delegation is allowed | Medium | GMAIL.1.1 | PR.AA-05 | IAC-21 |
+| GML-002 | DKIM is not published for every domain | High | GMAIL.2.1 | PR.IR-01 | NET-12 |
+| GML-003 | SPF does not hard-fail unauthorised senders | High | GMAIL.3.1 | PR.IR-01 | NET-12 |
+| GML-004 | DMARC is not published for every domain | High | GMAIL.4.1 | PR.IR-01 | NET-12 |
+| GML-005 | DMARC policy is not reject | High | GMAIL.4.2 | PR.IR-01 | NET-12 |
+| GML-006 | DMARC aggregate reporting is not configured | Medium | GMAIL.4.4 | DE.CM-01 | NET-12 |
+| GML-007 | DMARC applies to only part of the mail | Medium | - | PR.IR-01 | NET-12 |
+| GML-008 | MTA-STS is not published | Low | - | PR.DS-02 | CRY-03 |
+| GML-009 | TLS reporting is not published | Low | - | DE.CM-01 | CRY-03 |
+| GML-010 | Protection against encrypted attachments is off | Medium | GMAIL.5.1 | DE.CM-09 | END-04 |
+| GML-011 | Protection against attachments with scripts is off | Medium | GMAIL.5.2 | DE.CM-09 | END-04 |
+| GML-012 | Protection against anomalous attachment types is off | Medium | GMAIL.5.3 | DE.CM-09 | END-04 |
+| GML-013 | Future recommended attachment protections are not applied automatically | Low | GMAIL.5.4 | DE.CM-09 | END-04 |
+| GML-014 | Suspicious attachments stay in the inbox | Medium | GMAIL.5.5 | DE.CM-09 | END-04 |
+| GML-015 | Links behind shorteners are not scanned | Medium | GMAIL.6.1 | DE.CM-09 | END-04 |
+| GML-016 | Images from external senders are not scanned | Medium | GMAIL.6.2 | DE.CM-09 | END-04 |
+| GML-017 | Aggressive warnings on untrusted links are off | Low | GMAIL.6.3 | DE.CM-09 | END-04 |
+| GML-018 | Future link and image protections are not applied automatically | Low | GMAIL.6.4 | DE.CM-09 | END-04 |
+| GML-019 | Domain-name spoofing protection is off | High | GMAIL.7.1 | PR.IR-01 | NET-12 |
+| GML-020 | Employee-name spoofing protection is off | High | GMAIL.7.2 | PR.IR-01 | NET-12 |
+| GML-021 | Protection against your domain being spoofed is off | High | GMAIL.7.3, GMAIL.7.5 | PR.IR-01 | NET-12 |
+| GML-022 | Unauthenticated email is not flagged | Medium | GMAIL.7.4 | PR.IR-01 | NET-12 |
+| GML-023 | Spoofed email is left in the inbox | Medium | GMAIL.7.6 | PR.IR-01 | NET-12 |
+| GML-024 | Future spoofing protections are not applied automatically | Low | GMAIL.7.7 | PR.IR-01 | NET-12 |
+| GML-025 | Users can import email from other providers | Low | GMAIL.8.1 | PR.DS-01 | NET-12 |
+| GML-026 | POP or IMAP access is enabled | High | GMAIL.9.1 | PR.AA-03 | IAC-02 |
+| GML-027 | Google Workspace Sync for Microsoft Outlook is enabled | Low | GMAIL.10.1 | PR.PS-01 | CFG-03 |
+| GML-028 | Users can automatically forward email outside the organisation | High | GMAIL.11.1 | PR.DS-01 | NET-12 |
+| GML-029 | Users can send mail through their own SMTP servers | Medium | GMAIL.12.1 | PR.IR-01 | NET-12 |
+| GML-030 | The spam-filter IP allowlist is not empty | High | GMAIL.14.1 | PR.IR-01 | NET-12 |
+| GML-031 | Enhanced pre-delivery message scanning is off | Medium | GMAIL.15.1 | DE.CM-09 | END-04 |
+| GML-032 | Comprehensive mail storage is not enabled | Medium | GMAIL.17.1 | PR.PS-04 | MON-10 |
+| GML-033 | Spam-filter override (allowlist) rules exist | Medium | GMAIL.18.1, GMAIL.18.2 | PR.IR-01 | NET-12 |
+| GML-034 | A rule hides warning banners for all senders on a list | Medium | GMAIL.18.3 | PR.IR-01 | NET-12 |
 
 ### Workspace: Identity and access
 

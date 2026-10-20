@@ -11,6 +11,7 @@ from .common import Context, binding_pairs, is_public, registrar, run_checks
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Cloud Storage"   # the name the control mapping and reports use for this domain
 
 
 def _buckets(ctx: Context, project: str) -> "list[dict]":

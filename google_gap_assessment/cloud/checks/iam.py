@@ -12,6 +12,7 @@ from .common import (Context, Pair, binding_pairs, has_items, is_public, leaf, o
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Identity and IAM"   # the name the control mapping and reports use for this domain
 
 CONSUMER_DOMAINS = ("gmail.com", "googlemail.com")
 PRIMITIVE_ROLES = ("roles/owner", "roles/editor")

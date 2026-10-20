@@ -14,6 +14,7 @@ from .common import Context, binding_pairs, is_public, leaf, registrar, run_chec
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Cloud KMS"   # the name the control mapping and reports use for this domain
 
 MAX_ROTATION_SECONDS = 90 * 86400
 

@@ -627,6 +627,547 @@
       ]
     },
     {
+      "id": "GML-001",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Mailbox delegation is allowed",
+      "severity": "Medium",
+      "scf": "IAC-21",
+      "nistCsf": "PR.AA-05",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > User settings > Mail delegation: untick \"Let users delegate access to their mailbox to other users in the domain\" (or restrict it to the OUs that need it)."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.1.1v1"
+      ]
+    },
+    {
+      "id": "GML-002",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DKIM is not published for every domain",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Authenticate email: select each domain, click Generate new record, publish the TXT record at google._domainkey.<domain>, then click Start authentication."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.2.1v1"
+      ]
+    },
+    {
+      "id": "GML-003",
+      "domain": "Workspace: Gmail and email security",
+      "name": "SPF does not hard-fail unauthorised senders",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Publish exactly one SPF TXT record per domain that ends in -all, for example \"v=spf1 include:_spf.google.com -all\".",
+        "Add the other services that legitimately send as you before tightening to -all."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.3.1v1"
+      ]
+    },
+    {
+      "id": "GML-004",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC is not published for every domain",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Publish a TXT record at _dmarc.<domain>, for example \"v=DMARC1; p=none; rua=mailto:dmarc-reports@<domain>\", and make sure there is only one."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.4.1v1"
+      ]
+    },
+    {
+      "id": "GML-005",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC policy is not reject",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Move the DMARC policy from none to quarantine to reject once the aggregate reports show only legitimate senders failing; set sp=reject for subdomains."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.4.2v1"
+      ]
+    },
+    {
+      "id": "GML-006",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC aggregate reporting is not configured",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "DE.CM-01",
+      "cis": [],
+      "remediation": [
+        "Add rua=mailto:<address> to the DMARC record (and ruf= if you want forensic reports) so you can see who sends mail as your domain."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.4.4v1"
+      ]
+    },
+    {
+      "id": "GML-007",
+      "domain": "Workspace: Gmail and email security",
+      "name": "DMARC applies to only part of the mail",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Remove pct= from the DMARC record, or set pct=100."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GML-008",
+      "domain": "Workspace: Gmail and email security",
+      "name": "MTA-STS is not published",
+      "severity": "Low",
+      "scf": "CRY-03",
+      "nistCsf": "PR.DS-02",
+      "cis": [],
+      "remediation": [
+        "Publish a TXT record at _mta-sts.<domain> (\"v=STSv1; id=<timestamp>\") and host the policy file at https://mta-sts.<domain>/.well-known/mta-sts.txt."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GML-009",
+      "domain": "Workspace: Gmail and email security",
+      "name": "TLS reporting is not published",
+      "severity": "Low",
+      "scf": "CRY-03",
+      "nistCsf": "DE.CM-01",
+      "cis": [],
+      "remediation": [
+        "Publish a TXT record at _smtp._tls.<domain>, for example \"v=TLSRPTv1; rua=mailto:tls-reports@<domain>\"."
+      ],
+      "source": "workspace",
+      "scuba": []
+    },
+    {
+      "id": "GML-010",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against encrypted attachments is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Protect against encrypted attachments from untrusted senders\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.1v1"
+      ]
+    },
+    {
+      "id": "GML-011",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against attachments with scripts is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Protect against attachments with scripts from untrusted senders\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.2v1"
+      ]
+    },
+    {
+      "id": "GML-012",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against anomalous attachment types is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Protect against anomalous attachment types in emails\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.3v1"
+      ]
+    },
+    {
+      "id": "GML-013",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Future recommended attachment protections are not applied automatically",
+      "severity": "Low",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: tick \"Apply future recommended settings automatically\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.4v1"
+      ]
+    },
+    {
+      "id": "GML-014",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Suspicious attachments stay in the inbox",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Attachments: set the action for each protection to \"Move email to spam\" or \"Quarantine\", not \"Keep email in inbox and show warning\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.5.5v1"
+      ]
+    },
+    {
+      "id": "GML-015",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Links behind shorteners are not scanned",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Identify links behind shortened URLs\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.1v1"
+      ]
+    },
+    {
+      "id": "GML-016",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Images from external senders are not scanned",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Scan linked images\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.2v1"
+      ]
+    },
+    {
+      "id": "GML-017",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Aggressive warnings on untrusted links are off",
+      "severity": "Low",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Show warning prompt for any click on links to untrusted domains\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.3v1"
+      ]
+    },
+    {
+      "id": "GML-018",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Future link and image protections are not applied automatically",
+      "severity": "Low",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Links and external images: tick \"Apply future recommended settings automatically\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.6.4v1"
+      ]
+    },
+    {
+      "id": "GML-019",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Domain-name spoofing protection is off",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against domain spoofing based on similar domain names\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.1v1"
+      ]
+    },
+    {
+      "id": "GML-020",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Employee-name spoofing protection is off",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against spoofing of employee names\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.2v1"
+      ]
+    },
+    {
+      "id": "GML-021",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Protection against your domain being spoofed is off",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against inbound emails spoofing your domain\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.3v1",
+        "GWS.GMAIL.7.5v1"
+      ]
+    },
+    {
+      "id": "GML-022",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Unauthenticated email is not flagged",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Protect against unauthenticated emails\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.4v1"
+      ]
+    },
+    {
+      "id": "GML-023",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Spoofed email is left in the inbox",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: set each action to \"Move email to spam\" or \"Quarantine\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.6v1"
+      ]
+    },
+    {
+      "id": "GML-024",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Future spoofing protections are not applied automatically",
+      "severity": "Low",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Safety > Spoofing and authentication: tick \"Apply future recommended settings automatically\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.7.7v1"
+      ]
+    },
+    {
+      "id": "GML-025",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Users can import email from other providers",
+      "severity": "Low",
+      "scf": "NET-12",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > User settings > Email import: untick \"Allow users to import email and contacts from other providers\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.8.1v1"
+      ]
+    },
+    {
+      "id": "GML-026",
+      "domain": "Workspace: Gmail and email security",
+      "name": "POP or IMAP access is enabled",
+      "severity": "High",
+      "scf": "IAC-02",
+      "nistCsf": "PR.AA-03",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > End User Access > POP and IMAP access: untick \"Enable POP access\" and \"Enable IMAP access\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.9.1v1"
+      ]
+    },
+    {
+      "id": "GML-027",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Google Workspace Sync for Microsoft Outlook is enabled",
+      "severity": "Low",
+      "scf": "CFG-03",
+      "nistCsf": "PR.PS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > End User Access > Google Workspace Sync: untick \"Enable Google Workspace Sync for Microsoft Outlook for my users\" unless it is needed."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.10.1v1"
+      ]
+    },
+    {
+      "id": "GML-028",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Users can automatically forward email outside the organisation",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.DS-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > End User Access > Automatic forwarding: untick \"Allow users to automatically forward incoming email to another address\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.11.1v1"
+      ]
+    },
+    {
+      "id": "GML-029",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Users can send mail through their own SMTP servers",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Hosts / Routing > Allow per-user outbound gateways: untick it."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.12.1v1"
+      ]
+    },
+    {
+      "id": "GML-030",
+      "domain": "Workspace: Gmail and email security",
+      "name": "The spam-filter IP allowlist is not empty",
+      "severity": "High",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Email allowlist: remove all IP addresses, and use authenticated partners and DMARC instead."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.14.1v1"
+      ]
+    },
+    {
+      "id": "GML-031",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Enhanced pre-delivery message scanning is off",
+      "severity": "Medium",
+      "scf": "END-04",
+      "nistCsf": "DE.CM-09",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Enhanced pre-delivery message scanning: tick \"Enables improved detection of suspicious content prior to delivery\"."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.15.1v1"
+      ]
+    },
+    {
+      "id": "GML-032",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Comprehensive mail storage is not enabled",
+      "severity": "Medium",
+      "scf": "MON-10",
+      "nistCsf": "PR.PS-04",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Compliance > Comprehensive mail storage: add the setting so a copy of all sent and received mail is kept in each user's mailbox."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.17.1v1"
+      ]
+    },
+    {
+      "id": "GML-033",
+      "domain": "Workspace: Gmail and email security",
+      "name": "Spam-filter override (allowlist) rules exist",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Spam: review each override rule and remove senders or domains that do not need to bypass filtering."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.18.1v1",
+        "GWS.GMAIL.18.2v1"
+      ]
+    },
+    {
+      "id": "GML-034",
+      "domain": "Workspace: Gmail and email security",
+      "name": "A rule hides warning banners for all senders on a list",
+      "severity": "Medium",
+      "scf": "NET-12",
+      "nistCsf": "PR.IR-01",
+      "cis": [],
+      "remediation": [
+        "Admin console > Apps > Google Workspace > Gmail > Spam, phishing and malware > Spam: untick \"Hide warning banners for all messages from senders in the list\" on each override rule."
+      ],
+      "source": "workspace",
+      "scuba": [
+        "GWS.GMAIL.18.3v1"
+      ]
+    },
+    {
       "id": "IAM-001",
       "domain": "Identity and IAM",
       "name": "Owner or Editor role granted to users, groups or domains",

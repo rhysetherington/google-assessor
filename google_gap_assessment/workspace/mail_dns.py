@@ -94,3 +94,46 @@ def dmarc_record(records: "list[str]") -> "dict[str, str] | None":
 
 def has_valid_dkim_key(records: "list[str]") -> bool:
     return any(re.match(r"(?i)\s*v=DKIM1", r) and re.search(r"(?i)\bp=[A-Za-z0-9+/=\s]{20,}", r) for r in records)
+
+
+def dmarc_candidates(records: "list[str]") -> "list[str]":
+    return [r for r in records if re.match(r"(?i)\s*v=DMARC1\s*;", r)]
+
+
+def organisational_parent(domain: str) -> "str | None":
+    """The domain with its leftmost label removed, or None when only two labels remain.
+
+    A naive approximation of the "organisational domain": it is right for example.com and mail.example.com and wrong for names under
+    multi-label public suffixes such as example.co.uk. DMARC falls back to the parent when a subdomain publishes no record of its own.
+    """
+    labels = domain.lower().strip(".").split(".")
+    return ".".join(labels[1:]) if len(labels) > 2 else None
+
+
+def find_dmarc(resolver, domain: str) -> "tuple[list[str], str]":
+    """(DMARC records, domain they were found at) for a domain: its own _dmarc record, else its parent's. ([], domain) if neither."""
+    own = dmarc_candidates(resolver.txt(f"_dmarc.{domain}"))
+    if own:
+        return own, domain
+    parent = organisational_parent(domain)
+    if parent:
+        inherited = dmarc_candidates(resolver.txt(f"_dmarc.{parent}"))
+        if inherited:
+            return inherited, parent
+    return [], domain
+
+
+def spf_verdict(resolver, domain: str, depth: int = 0) -> str:
+    """'hardfail' | 'softfail' | 'neutral' | 'open' | 'none' | 'multiple' | 'no-all', following up to three redirect= modifiers."""
+    found = spf_records(resolver.txt(domain))
+    if not found:
+        return "none"
+    if len(found) > 1:
+        return "multiple"
+    qualifier = spf_all_qualifier(found[0])
+    if qualifier is None:
+        redirect = re.search(r"(?i)(?:^|\s)redirect=(\S+)", found[0])
+        if redirect and depth < 3:
+            return spf_verdict(resolver, redirect.group(1), depth + 1)
+        return "no-all"
+    return {"-": "hardfail", "~": "softfail", "?": "neutral", "+": "open"}[qualifier]

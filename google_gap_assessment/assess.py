@@ -19,13 +19,13 @@ from .cloud.checks.common import Context
 from .cloud.gcloud import Gcloud, GcloudError
 from .model import SEVERITY_ORDER, Options, measure_score
 from .validation import is_project_id, is_service_account_email
-from .workspace.checks import identity
+from .workspace.checks import gmail, identity
 from .workspace.session import WsSession
 
 # Domain name -> collector module. Kms is opt-in because it needs extra calls per key ring and key.
 CLOUD_DOMAINS = {"Iam": iam, "Logging": audit_logging, "Network": network, "Compute": compute,
                  "Storage": storage, "Sql": sql, "OrgPolicy": orgpolicy, "Kms": kms}
-WORKSPACE_DOMAINS = {"Identity": identity}
+WORKSPACE_DOMAINS = {"Identity": identity, "Gmail": gmail}
 DOMAINS = {**WORKSPACE_DOMAINS, **CLOUD_DOMAINS}
 DEFAULT_CLOUD_DOMAINS = ["Iam", "Logging", "Network", "Compute", "Storage", "Sql", "OrgPolicy"]
 DEFAULT_WORKSPACE_DOMAINS = list(WORKSPACE_DOMAINS)

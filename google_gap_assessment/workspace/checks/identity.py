@@ -14,6 +14,7 @@ from .common import (PolicyRule, all_of, describe_fields, flag, is_in, not_in, p
 
 CHECKS: list = []
 check = registrar(CHECKS)
+DOMAIN_NAME = "Workspace: Identity and access"   # the name the control mapping and reports use for this domain
 
 ENROLL = "security.two_step_verification_enrollment"
 ENFORCE = "security.two_step_verification_enforcement"
