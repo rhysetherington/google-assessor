@@ -174,8 +174,16 @@ class Docs(unittest.TestCase):
     def test_coverage_page_is_up_to_date(self):
         self.assertEqual(0, coverage.main(["--check"]))
 
-    def test_readme_states_the_real_number_of_checks(self):
-        self.assertIn(f"**{len(CONTROL_MAPPING)} checks**", (PKG.parent / "README.md").read_text())
+    def test_readme_headline_numbers_match_the_data(self):
+        readme = (PKG.parent / "README.md").read_text()
+        ws = sum(1 for c in CONTROL_MAPPING.values() if c["source"] == "workspace")
+        cloud = len(CONTROL_MAPPING) - ws
+        index = json.loads((PKG / "data" / "scuba_policies.json").read_text())
+        covered = {ref.removesuffix("v1") for c in CONTROL_MAPPING.values() for ref in c.get("scuba", [])}
+        for expected in (f"**{len(CONTROL_MAPPING)} checks**", f"**Google Workspace** ({ws} checks)", f"**Google Cloud** ({cloud} checks)",
+                         f"**{len(covered)} of the {len(index['policies'])} are covered**", f"the other {len(index['not_covered'])} are listed"):
+            with self.subTest(expected):
+                self.assertIn(expected, readme)
 
     def test_no_secret_looking_content_in_the_repository(self):
         pattern = re.compile(r"BEGIN (RSA |EC )?PRIVATE KEY|\"private_key\"\s*:|ya29\.[0-9A-Za-z_-]{20,}|AIza[0-9A-Za-z_-]{30,}")
