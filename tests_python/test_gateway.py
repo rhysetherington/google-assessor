@@ -136,8 +136,13 @@ class SourceScan(unittest.TestCase):
                     posts.append((path.name, method.group(1)))
             self.assertNotRegex(text, r"""method\s*=\s*["'](PUT|PATCH|DELETE)["']""")
         self.assertGreaterEqual(seen, 3, "the scan must see client.py, mail_dns.py and auth.py")
-        self.assertEqual([("auth.py", "POST")], posts)  # tokeninfo: asks Google which scopes a token holds; changes nothing
-        self.assertIn("https://oauth2.googleapis.com/tokeninfo", (PACKAGE / "workspace" / "auth.py").read_text())
+        # The only non-GET requests are OAuth housekeeping in auth.py: ask Google what a token holds, swap the sign-in code for a token,
+        # and revoke the token at the end. None of them touches tenant data.
+        self.assertEqual({"auth.py"}, {name for name, _ in posts})
+        auth_text = (PACKAGE / "workspace" / "auth.py").read_text()
+        urls = set(re.findall(r'"(https://[^"]+)"', auth_text))
+        self.assertTrue({"https://oauth2.googleapis.com/tokeninfo", "https://oauth2.googleapis.com/token", "https://oauth2.googleapis.com/revoke"} <= urls)
+        self.assertEqual({"POST"}, {method for _, method in posts})
 
 
 if __name__ == "__main__":

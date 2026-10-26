@@ -152,12 +152,13 @@ class Auth(unittest.TestCase):
         for scope in auth.SCOPES:
             self.assertTrue(scope.endswith(".readonly") or scope.endswith("/cloud-identity.policies.readonly") or ".readonly" in scope, scope)
 
-    def test_setup_instructions_name_the_scopes_and_never_embed_a_secret(self):
-        text = auth.setup_instructions("client_secret.json", "my-proj")
+    def test_setup_instructions_explain_the_flow_and_name_every_permission(self):
+        text = auth.setup_instructions("~/.config/client_secret.json", "my-proj")
         for scope in auth.SCOPES:
-            self.assertIn(scope, text)
-        self.assertIn("--quota-project my-proj", text)
-        self.assertIn("revoke", text)
+            self.assertIn(scope.rsplit("/", 1)[-1], text)
+        for expected in ("--oauth-client-file ~/.config/client_secret.json", "Desktop app", "Internal", "revokes", "in memory", "admin.googleapis.com"):
+            self.assertIn(expected, text)
+        self.assertNotIn("cloud-platform", text)
 
 
 class PolicyReducer(unittest.TestCase):

@@ -47,11 +47,11 @@ def connect_workspace(quota_project: Optional[str] = None, doh_endpoint: str = D
     granted = set(str(info.get("scope", "")).split())
     missing = auth.missing_scopes(granted)
     if len(missing) == len(auth.SCOPES):
-        raise RuntimeError("The access token has none of the read-only Workspace scopes.\n" + auth.setup_instructions(quota_project=quota_project or "YOUR_PROJECT_ID"))
+        raise RuntimeError("The access token has none of the read-only Workspace scopes (a plain gcloud sign-in does not grant them).\n" + auth.setup_instructions(quota_project=quota_project or "YOUR_PROJECT_ID"))
     risky = auth.write_capable_scopes(granted)
     if risky:
         warn("The sign-in on this machine can do more than read: it holds " + ", ".join(r.rsplit("/", 1)[-1] for r in risky) + ". The assessor only reads, "
-             "but sign in again with the read-only scopes (python3 -m google_gap_assessment --setup-help) and revoke this one with: gcloud auth application-default revoke")
+             "but use the tool's own read-only sign-in instead (python3 -m google_gap_assessment --setup-help, then --oauth-client-file) and revoke this one with: gcloud auth application-default revoke")
     for scope in missing:  # partial scopes still work: the checks that need the missing one report NotAssessed
         warn(f"The access token lacks {scope} ({auth.SCOPES[scope]}); checks that need it will be reported as not assessed.")
 

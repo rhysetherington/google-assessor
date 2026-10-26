@@ -203,7 +203,7 @@ class Connecting(unittest.TestCase):
         self.assertEqual([], w)
 
     def test_a_token_with_none_of_the_scopes_gets_the_setup_instructions(self):
-        with self.assertRaisesRegex(RuntimeError, "(?s)none of the read-only Workspace scopes.*gcloud auth application-default login"):
+        with self.assertRaisesRegex(RuntimeError, "(?s)none of the read-only Workspace scopes.*--oauth-client-file"):
             self.connect(info={"scope": "openid email"})
 
     def test_a_token_with_some_scopes_proceeds_with_a_warning_per_missing_scope(self):

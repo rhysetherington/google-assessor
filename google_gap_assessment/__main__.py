@@ -11,6 +11,7 @@ from .assess import (CHECK_INDEX, CLOUD_DOMAINS, DEFAULT_CLOUD_DOMAINS, DEFAULT_
                      export_assessment, resolve_checks, run_assessment)
 from .cloud.gcloud import Gcloud
 from .model import CONTROL_MAPPING, Options
+from .errors import ApiError
 from .validation import is_numeric_id, is_project_id, is_service_account_email
 from .workspace import auth
 from .workspace.context import WsOptions
@@ -29,7 +30,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--scope", choices=SCOPES, help="what to assess: workspace, both (Workspace and Google Cloud) or cloud. Asked for when omitted.")
     p.add_argument("--setup-help", action="store_true", help="print the one-time Google Workspace sign-in setup and exit")
     g = p.add_argument_group("Google Workspace")
-    g.add_argument("--quota-project", metavar="PROJECT", help="Google Cloud project (with the Admin SDK and Cloud Identity APIs enabled) that the API calls are quota'd to")
+    g.add_argument("--oauth-client-file", metavar="FILE", help="Desktop-app OAuth client JSON from the Cloud Console; the tool then signs the Super Admin in itself (read-only scopes, in memory, revoked at the end). Without it, gcloud Application Default Credentials are used")
+    g.add_argument("--quota-project", metavar="PROJECT", help="only needed with gcloud Application Default Credentials: the project that API calls are quota'd to")
     g.add_argument("--no-dns", action="store_true", help="do not look up SPF/DKIM/DMARC records (your domain names are sent to a DNS-over-HTTPS resolver otherwise)")
     g.add_argument("--doh-endpoint", default=DEFAULT_ENDPOINT, metavar="URL", help="DNS-over-HTTPS resolver for the email authentication checks")
     g.add_argument("--stale-days", type=int, default=90, help="days without sign-in after which an active account counts as stale (default 90)")
@@ -108,6 +110,7 @@ def main(argv: "list[str] | None" = None, gcloud: "Gcloud | None" = None, worksp
     if args.brand_color and not (len(args.brand_color) == 7 and args.brand_color.startswith("#")):
         parser.error("--brand-color must be #RRGGBB.")
 
+    provider = None
     try:
         scope = choose_scope(args, sys.stdin.isatty() and not args.no_prompt)
         # Which domains run, and therefore which targets must be connected.
@@ -125,17 +128,22 @@ def main(argv: "list[str] | None" = None, gcloud: "Gcloud | None" = None, worksp
         session = workspace
         if needs_ws and session is None:
             print("... Connecting to Google Workspace", file=sys.stderr)
+            if args.oauth_client_file:
+                provider = auth.BrowserTokenProvider(*auth.load_client_file(args.oauth_client_file))
             session = connect_workspace(quota_project=args.quota_project, doh_endpoint=args.doh_endpoint, check_dns=not args.no_dns,
-                                        options=WsOptions(check_dns=not args.no_dns, stale_days=args.stale_days))
+                                        options=WsOptions(check_dns=not args.no_dns, stale_days=args.stale_days), token_provider=provider)
         cloud = (gcloud or Gcloud(impersonate=args.impersonate_service_account)) if needs_cloud else None
         options = Options(args.corporate_domain, args.key_max_age_days, args.kms_location or ["global"])
         assessment = run_assessment(
             cloud, args.project_id, args.folder_id, args.organization_id, domains, options, args.accepted_risk_path, args.check,
             args.client_name, args.assessment_name, args.assessor_name, args.assessment_date, args.reference, args.prepared_by,
             args.no_prompt, args.allow_elevated_account, progress=lambda m: print(f"... {m}", file=sys.stderr), workspace=session if needs_ws else None)
-    except (RuntimeError, ValueError, FileNotFoundError) as exc:
+    except (RuntimeError, ValueError, FileNotFoundError, ApiError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+    finally:
+        if provider is not None and provider.revoke():
+            print("... Signed out: the Workspace sign-in was revoked.", file=sys.stderr)
 
     s = assessment["Summary"]
     print(f"Score {assessment['Score']}%  |  {s['TotalChecks']} checks: {s['Passed']} passed, {s['Gaps']} gaps, "

@@ -17,8 +17,8 @@ Every check is mapped to SCF and NIST CSF 2.0. It is the Google sibling of the M
   write cannot be added unnoticed.
 - **Honest about what it cannot see.** A setting it cannot read (missing role or edition, an API error, a field Google did not return) is
   *NotAssessed* and counts against the score, never a pass. A product that is switched off is *not applicable*.
-- **Nothing is stored.** No credentials, tenant or project IDs live in the code or on disk. Sign-in is done by gcloud, and you are asked for
-  what to assess each run.
+- **Nothing is stored.** No credentials, tenant or project IDs live in the code or on disk. The Workspace sign-in is done by the tool itself with
+  read-only permissions, kept in memory and revoked when the run ends; you are asked for what to assess each run.
 - **No dependencies.** Python standard library only; the test suite replaces Google with fixtures.
 
 > **Not affiliated with CISA.** This is an independent tool. The SCuBA baselines are CISA's work (released under CC0); this project cites
@@ -37,17 +37,22 @@ python3 -m google_gap_assessment            # asks: Workspace only / Workspace a
 
 ### Google Workspace
 
-Reading a Workspace tenant needs a **Super Admin** to sign in once with read-only scopes. Google does not let gcloud's own login request
-the Admin SDK scopes, so you bring your own OAuth client (a Desktop app in a project you control). The tool prints the steps:
+Reading a Workspace tenant needs a **Super Admin** to sign in. The tool does the sign-in itself (it opens your browser), using an OAuth client
+from a Google Cloud project you control. One-time setup, about five minutes; `--setup-help` prints it:
+
+1. In the Cloud Console create a project and enable the **Admin SDK API** and **Cloud Identity API**.
+2. Under *OAuth consent screen* choose **Internal**; under *Credentials* create an OAuth client of type **Desktop app** and download its JSON to
+   somewhere outside any git folder, for example `~/.config/client_secret.json`.
+3. Run the assessment and sign in as the Super Admin when the browser opens:
 
 ```bash
-python3 -m google_gap_assessment --setup-help --quota-project my-project     # the five-minute, one-time setup
-python3 -m google_gap_assessment --scope workspace --quota-project my-project
+python3 -m google_gap_assessment --scope workspace --oauth-client-file ~/.config/client_secret.json
 ```
 
-The setup enables the Admin SDK and Cloud Identity APIs in that project, then runs
-`gcloud auth application-default login --client-id-file=... --scopes=<the read-only scopes>`. Sign out afterwards with
-`gcloud auth application-default revoke`. No key file is created and no secret is stored by this tool.
+The tool asks for the read-only permissions only (viewing users, groups, domains, admin roles and settings), keeps the sign-in in memory, never
+writes a token to disk, and **revokes the sign-in when the run ends**. It does not use `gcloud auth application-default login` for this because
+gcloud refuses to issue that credential without the broad `cloud-platform` scope, which could change Google Cloud data; the tool warns if it is ever
+given such a token.
 
 ### Google Cloud
 
@@ -62,7 +67,7 @@ Reviewer) or `--impersonate-service-account`; an account that can change resourc
 ### Both
 
 ```bash
-python3 -m google_gap_assessment --scope both --quota-project my-project --project-id my-project-id --corporate-domain contoso.com
+python3 -m google_gap_assessment --scope both --oauth-client-file ~/.config/client_secret.json --project-id my-project-id --corporate-domain contoso.com
 ```
 
 You are asked for report details (client name, assessor, date) unless you pass `--no-prompt`. Reports go to
@@ -86,7 +91,9 @@ only the admin audit log shows it, field names could not be verified, or it is a
 ## Permissions and data
 
 **Workspace:** a Super Admin signs in with these read-only scopes (`admin.directory.*.readonly`, `admin.reports.audit.readonly`,
-`cloud-identity.policies.readonly`, `cloud-identity.inboundsso.readonly`); the tool checks the token holds them and says which are missing. It
+`cloud-identity.policies.readonly`, `cloud-identity.inboundsso.readonly`); the tool checks the token holds them and says which are missing. Google has no
+Global Reader equivalent for these settings, so the account has to be a Super Admin even though the tool only reads: use a dedicated admin account
+with 2-step verification. (Whether a narrower custom admin role can read every setting is untested.) It
 asks the Directory API only for the fields it needs (no names, phone numbers or addresses) and never reads mail, files or calendar contents.
 **The tenant's domain names are sent to a DNS-over-HTTPS resolver** (Cloudflare by default; `--doh-endpoint` changes it, `--no-dns` skips
 those checks).
@@ -123,7 +130,7 @@ or the finding stays a Gap. An expired acceptance stops applying. Files named `*
 
 ```
 google_gap_assessment/
-  workspace/          client.py (GET-only HTTPS), auth.py (gcloud ADC token), policy.py (Policy API reducer), directory.py, mail_dns.py, session.py
+  workspace/          client.py (GET-only HTTPS), auth.py (browser sign-in, tokens), policy.py (Policy API reducer), directory.py, mail_dns.py, session.py
     checks/           identity.py gmail.py drive.py groups.py meet.py calendar.py chat.py classroom.py sites.py
   cloud/              gcloud.py (read-only gateway), scope.py, guard.py
     checks/           iam.py audit_logging.py network.py compute.py storage.py sql.py kms.py orgpolicy.py
