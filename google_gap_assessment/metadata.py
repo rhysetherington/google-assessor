@@ -10,6 +10,8 @@ from datetime import date, datetime
 from .validation import safe_name
 
 DEFAULT_ASSESSMENT_NAME = "Google Cloud Security Gap Assessment"
+DEFAULT_NAMES = {"workspace": "Google Workspace Security Gap Assessment", "cloud": DEFAULT_ASSESSMENT_NAME,
+                 "workspace+cloud": "Google Workspace and Google Cloud Security Gap Assessment"}
 
 
 def default_client_name(primary_domain: "str | None", project_name: "str | None") -> str:
@@ -29,13 +31,14 @@ def _clip(text: "str | None", limit: int) -> str:
 
 
 def resolve_metadata(client_name=None, assessment_name=None, assessor_name=None, prepared_by=None, assessment_date=None,
-                     reference=None, project_name=None, primary_domain=None, signed_in_account=None, no_prompt=False) -> dict:
+                     reference=None, project_name=None, primary_domain=None, signed_in_account=None, no_prompt=False,
+                     targets=()) -> dict:
     interactive = sys.stdin.isatty() and not no_prompt
     ask = _ask if interactive else (lambda _prompt, default: default)
     if interactive:
         print("\nAssessment details (press Enter to accept the value in brackets)")
     client_name = client_name or ask("Client name", default_client_name(primary_domain, project_name))
-    assessment_name = assessment_name or ask("Assessment name", DEFAULT_ASSESSMENT_NAME)
+    assessment_name = assessment_name or ask("Assessment name", DEFAULT_NAMES.get("+".join(sorted(targets, reverse=True)), DEFAULT_ASSESSMENT_NAME))
     assessor_name = assessor_name or ask("Assessor (who is performing this assessment)", signed_in_account or "")
     assessment_date = assessment_date or ask("Assessment date (yyyy-MM-dd)", date.today().isoformat())
     if not reference and interactive:

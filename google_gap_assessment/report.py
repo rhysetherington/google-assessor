@@ -203,7 +203,7 @@ def protect(path: Path) -> None:
         os.chmod(child, stat.S_IRWXU if child.is_dir() else stat.S_IRUSR | stat.S_IWUSR)
 
 
-def export(assessment: dict, export_path: Path, formats=("JSON", "Markdown"), brand_color: "str | None" = None,
+def export(assessment: dict, export_path: Path, formats=("JSON", "Markdown", "HTML"), brand_color: "str | None" = None,
            include_evidence: bool = False) -> "list[str]":
     """Write the Findings JSON (always) plus Markdown and/or HTML. Returns the files written."""
     export_path = Path(export_path)

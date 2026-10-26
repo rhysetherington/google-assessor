@@ -198,3 +198,14 @@ class ElevatedGuard(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReportDefaults(unittest.TestCase):
+    def test_every_run_writes_json_markdown_and_html_unless_told_otherwise(self):
+        from google_gap_assessment.__main__ import build_parser
+        self.assertEqual(["JSON", "Markdown", "HTML"], build_parser().parse_args([]).format)
+
+    def test_default_assessment_name_follows_what_was_assessed(self):
+        from google_gap_assessment.metadata import DEFAULT_NAMES
+        self.assertIn("Workspace", DEFAULT_NAMES["workspace"])
+        self.assertNotIn("Workspace", DEFAULT_NAMES["cloud"])

@@ -58,7 +58,7 @@ given such a token.
 
 ```bash
 gcloud auth login
-python3 -m google_gap_assessment --scope cloud --project-id my-project-id --format JSON Markdown HTML
+python3 -m google_gap_assessment --scope cloud --project-id my-project-id
 ```
 
 Give it `--folder-id` or `--organization-id` instead to assess the projects directly under them. Use a read-only account (Viewer and Security

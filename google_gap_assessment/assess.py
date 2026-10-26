@@ -140,7 +140,8 @@ def run_assessment(gcloud: "Gcloud | None" = None, project_ids=(), folder_id=Non
 
     identities = [i for i in dict.fromkeys(identities) if i]
     meta = metadata.resolve_metadata(client_name, assessment_name, assessor_name, prepared_by, assessment_date, reference,
-                                     meta_args["project_name"], meta_args["primary_domain"], identities[0] if identities else None, no_prompt)
+                                     meta_args["project_name"], meta_args["primary_domain"], identities[0] if identities else None, no_prompt,
+                                     scope_info["Targets"])
 
     accepted.apply(findings, accepted.load(accepted_risk_path))
     findings.sort(key=lambda f: (SEVERITY_ORDER[f["Severity"]], f["FindingId"]))
@@ -161,7 +162,7 @@ def run_assessment(gcloud: "Gcloud | None" = None, project_ids=(), folder_id=Non
     }
 
 
-def export_assessment(assessment: dict, export_path, formats=("JSON", "Markdown"), brand_color=None, include_evidence=False) -> "list[str]":
+def export_assessment(assessment: dict, export_path, formats=("JSON", "Markdown", "HTML"), brand_color=None, include_evidence=False) -> "list[str]":
     """Write the reports into <export_path>/<ClientName>-<date>/ (a clock suffix is added if that folder already exists)."""
     folder = Path(export_path) / metadata.base_name(assessment)
     if folder.exists():

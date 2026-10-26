@@ -46,7 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--allow-elevated-account", action="store_true", help="run as a Google Cloud account holding Owner/Editor without being asked")
     r = p.add_argument_group("Report")
     r.add_argument("--export-path", default="GoogleAssessment", help="folder the reports are written under (default: ./GoogleAssessment)")
-    r.add_argument("--format", nargs="+", choices=["JSON", "Markdown", "HTML"], default=["JSON", "Markdown"], help="report formats (JSON is always written)")
+    r.add_argument("--format", nargs="+", choices=["JSON", "Markdown", "HTML"], default=["JSON", "Markdown", "HTML"], help="report formats (default: all three; JSON is always written)")
     r.add_argument("--domain", nargs="+", choices=list(DOMAINS), help="check domains to run (default: all for the chosen scope; Kms is opt-in)")
     r.add_argument("--check", nargs="+", metavar="ID", help="redo only these checks (e.g. GML-028 IAM-003); the owning domains run automatically")
     r.add_argument("--list-checks", action="store_true", help="list every check id with its domain, severity and name, then exit")
