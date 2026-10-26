@@ -33,7 +33,8 @@ def registrar(registry: "list[Check]"):
     return check
 
 
-def run_checks(ctx: Any, projects: "list[str]", checks: "list[Check]", only: "Iterable[str] | None" = None) -> "list[dict]":
+def run_checks(ctx: Any, projects: "list[str]", checks: "list[Check]", only: "Iterable[str] | None" = None,
+               disabled_api_means_unused: bool = True) -> "list[dict]":
     """Run each check for every project and merge the results into one finding per check.
 
     Each check is isolated: if one cannot read its data it becomes NotAssessed on its own and its neighbours still run.
@@ -46,7 +47,7 @@ def run_checks(ctx: Any, projects: "list[str]", checks: "list[Check]", only: "It
             continue
         results: "list[ProjectResult]" = []
         for project in projects:
-            results += run_project_check(project, [chk.id], lambda p, chk=chk: chk.run(ctx, p))
+            results += run_project_check(project, [chk.id], lambda p, chk=chk: chk.run(ctx, p), disabled_api_means_unused)
         findings.append(merge_results(chk.id, results))
     return findings
 

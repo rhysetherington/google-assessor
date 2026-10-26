@@ -11,7 +11,8 @@ from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 from ...model import ProjectResult, gap_or_pass
-from ...registry import Check, registrar, run_checks  # noqa: F401 - re-exported for the domain modules
+from ...registry import Check, registrar  # noqa: F401 - re-exported for the domain modules
+from ...registry import run_checks as _run_checks
 from ..context import WsContext
 from ...errors import ApiError
 from ..policy import judge, judge_many
@@ -134,3 +135,9 @@ def dns_check(ctx: WsContext, tenant: str, finding_id: str, per_domain: "Callabl
     if failed:
         out.append(ProjectResult(tenant, finding_id, "NotAssessed", [], f"DNS lookup failed for: {'; '.join(failed[:3])}"))
     return out
+
+
+def run_checks(ctx, tenants, checks, only=None):
+    """Registry runner for Workspace. A disabled API here is the assessor's own project missing an API, never a tenant that
+    does not use the service, so it is NotAssessed (and counts against the score), not NotApplicable."""
+    return _run_checks(ctx, tenants, checks, only, disabled_api_means_unused=False)

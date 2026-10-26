@@ -69,22 +69,26 @@ def gap_or_pass(project: str, finding_id: str, affected: "Iterable[str]" = (), d
     return ProjectResult(project, finding_id, "Gap" if items else "Pass", items, detail)
 
 
-def run_project_check(project: str, ids: "list[str]", fn: "Callable[[str], Iterable[ProjectResult]]") -> "list[ProjectResult]":
+def run_project_check(project: str, ids: "list[str]", fn: "Callable[[str], Iterable[ProjectResult]]",
+                      disabled_api_means_unused: bool = True) -> "list[ProjectResult]":
     """Run the checks for one project.
 
     Any failure (missing permission, API outage, unexpected field) becomes NotAssessed for the checks that
     did not finish, so one unreadable project never aborts the assessment and is never counted as a pass.
-    A disabled API becomes NotApplicable: the service is not in use, so there is nothing to misconfigure.
+    A disabled API becomes NotApplicable when ``disabled_api_means_unused`` (Google Cloud: the project does not use the
+    service, so there is nothing to misconfigure). It stays NotAssessed when it is false (Workspace: the API is disabled in
+    the assessor's own sign-in project, which says nothing about the tenant, so nothing was checked).
     """
     try:
         # Fully collected before use, so results produced before a failure are discarded rather than half reported.
         results = list(fn(project))
     except Exception as exc:  # noqa: BLE001 - deliberately broad: see docstring
         category = exc.category if isinstance(exc, ApiError) else "Other"
-        if category == "ApiDisabled":
+        if category == "ApiDisabled" and disabled_api_means_unused:
             status, detail = "NotApplicable", "The API is not enabled in this project, so there is nothing to assess."
         else:
             hint = {
+                "ApiDisabled": "Enable the Admin SDK API and the Cloud Identity API in the Google Cloud project that owns the OAuth client (see --setup-help).",
                 "PermissionDenied": "The signed-in account lacks a permission this check needs (see the permissions in the README).",
                 "Auth": "Sign-in expired or missing; run gcloud auth login.",
             }.get(category, "")

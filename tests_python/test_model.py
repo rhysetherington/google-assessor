@@ -49,6 +49,12 @@ class ProjectCheck(unittest.TestCase):
         def off(_p): raise GcloudError("SERVICE_DISABLED", "ApiDisabled")
         self.assertEqual("NotApplicable", run_project_check("a", ["X-1"], off)[0].status)
 
+    def test_disabled_api_is_not_assessed_when_it_says_nothing_about_the_target(self):
+        def off(_p): raise GcloudError("SERVICE_DISABLED", "ApiDisabled")
+        r = run_project_check("a", ["X-1"], off, disabled_api_means_unused=False)[0]
+        self.assertEqual("NotAssessed", r.status)
+        self.assertIn("Enable", r.detail)
+
     def test_results_before_a_failure_are_discarded(self):
         def partial(p):
             yield R(p, "X-1", "Pass")
