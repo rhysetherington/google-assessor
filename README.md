@@ -27,6 +27,8 @@ Every check is mapped to SCF and NIST CSF 2.0. It is the Google sibling of the M
 
 ## Quick start
 
+> **Running this for a client or as an administrator?** Follow the step-by-step guide: [`Docs/Instructions.md`](Docs/Instructions.md).
+
 You need Python 3.11 or later and the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install).
 
 ```bash

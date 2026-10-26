@@ -59,6 +59,7 @@ def setup_instructions(client_id_file: str = "~/.config/client_secret.json", quo
         "One-time setup (about five minutes, done by a Google Workspace Super Admin):\n"
         "  1. In the Google Cloud Console, create a project you control (any name) and enable these APIs under APIs & Services > Library:\n"
         f"       {' and '.join(APIS)}   (or: gcloud services enable {' '.join(APIS)} --project {quota_project})\n"
+        "     (Do this signed in as the account that owns the project; another account gets 'permission denied' enabling them.)\n"
         "  2. APIs & Services > OAuth consent screen: choose user type 'Internal', give it a name and your e-mail, and save.\n"
         "  3. APIs & Services > Credentials > Create credentials > OAuth client ID > 'Desktop app'. Download the JSON and save it as\n"
         f"     {client_id_file} (outside any git folder; it is git-ignored here if you keep it in this one).\n"
