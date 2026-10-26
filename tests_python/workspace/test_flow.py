@@ -213,6 +213,22 @@ class Connecting(unittest.TestCase):
         self.assertIn(list(auth.SCOPES)[-1], warnings[1])
         self.assertEqual("contoso.com", s.primary_domain)
 
+    def test_a_token_that_can_write_is_called_out(self):
+        info = {"scope": " ".join(auth.SCOPES) + " https://www.googleapis.com/auth/cloud-platform", "email": "a@b.c"}
+        _, warnings = self.connect(info=info)
+        self.assertEqual(1, len(warnings))
+        self.assertIn("cloud-platform", warnings[0])
+        self.assertIn("application-default revoke", warnings[0])
+
+    def test_a_read_only_token_gets_no_such_warning(self):
+        _, warnings = self.connect()
+        self.assertEqual([], warnings)
+
+    def test_which_scopes_count_as_write_capable(self):
+        self.assertEqual([], auth.write_capable_scopes(set(auth.SCOPES) | {"openid", "email", "https://www.googleapis.com/auth/userinfo.email"}))
+        self.assertEqual(["https://www.googleapis.com/auth/admin.directory.user"], auth.write_capable_scopes({"https://www.googleapis.com/auth/admin.directory.user"}))
+        self.assertEqual(["https://www.googleapis.com/auth/apps.groups.settings"], auth.write_capable_scopes({"https://www.googleapis.com/auth/apps.groups.settings"}))
+
     def test_missing_sign_in_is_explained(self):
         def no_token():
             raise ApiError("No Application Default Credentials.", "Auth")

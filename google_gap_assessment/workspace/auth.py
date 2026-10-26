@@ -102,5 +102,15 @@ def token_scopes(token: str, post: "Callable[..., dict] | None" = None) -> "set[
     return set(str(token_info(token, post).get("scope", "")).split())
 
 
+def write_capable_scopes(granted: "set[str]") -> "list[str]":
+    """Scopes in a token that could change things: the broad cloud-platform scope, and any Workspace admin scope that is not read-only.
+
+    The assessor only ever makes GET requests, but a token that *could* write is a credential worth not having lying around, and it
+    usually means the sign-in was done without the read-only scopes (a plain `gcloud auth application-default login`).
+    """
+    workspace_admin = ("admin.directory", "admin.reports", "cloud-identity", "apps.")
+    return sorted(s for s in granted if s.endswith("/cloud-platform") or (any(w in s for w in workspace_admin) and not s.endswith(".readonly")))
+
+
 def missing_scopes(granted: "set[str]") -> "list[str]":
     return [s for s in SCOPES if s not in granted]
