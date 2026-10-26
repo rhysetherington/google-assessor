@@ -74,6 +74,7 @@ CASES = [
     ("GML-028 gap: auto-forwarding allowed", "GML-028", "Gap", setting("gmail.auto_forwarding", enableAutoForwarding=True), None, None),
     ("GML-028 gap: forwarding allowed for one OU only", "GML-028", "Gap", lambda t: t.override("/Sales", "gmail.auto_forwarding", {"enableAutoForwarding": True}), None, "/Sales"),
     ("GML-029 gap: per-user outbound gateway", "GML-029", "Gap", setting("gmail.per_user_outbound_gateway", allowUsersToUseExternalSmtpServers=True), None, None),
+    ("GML-029 pass: never changed, Google documents the default as off", "GML-029", "Pass", lambda t: t.settings.pop("gmail.per_user_outbound_gateway"), None, None),
     ("GML-030 gap: allowlisted IPs", "GML-030", "Gap", setting("gmail.email_spam_filter_ip_allowlist", allowedIpAddresses=["203.0.113.0/24"]), None, "1 allowlisted"),
     ("GML-031 gap: pre-delivery scanning off", "GML-031", "Gap", setting("gmail.enhanced_pre_delivery_message_scanning", enableImprovedSuspiciousContentDetection=False), None, None),
     ("GML-032 gap: no storage rule configured", "GML-032", "Gap", lambda t: (t.settings.pop("gmail.comprehensive_mail_storage"), t.settings.pop("gmail.rule_states")), None, "no comprehensive"),

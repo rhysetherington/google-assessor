@@ -58,6 +58,8 @@ DEFAULTS: "dict[str, dict[str, Any]]" = {
     "gmail.email_spam_filter_ip_allowlist": {"allowedIpAddresses": []},
     "gmail.links_and_external_images": {"applyFutureSettingsAutomatically": True, "enableAggressiveWarningsOnUntrustedLinks": False},
     "gmail.mail_delegation": {"enableMailDelegation": False},
+    # Google's help ("Allow per-user outbound gateways"): users cannot use one unless an admin enables it.
+    "gmail.per_user_outbound_gateway": {"allowUsersToUseExternalSmtpServers": False},
     "gmail.spoofing_and_authentication": {"applyFutureSettingsAutomatically": True},
     "gmail.workspace_sync_for_outlook": {"enableGoogleWorkspaceSyncForMicrosoftOutlook": True},
     "groups_for_business.groups_sharing": {
