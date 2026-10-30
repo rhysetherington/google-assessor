@@ -115,6 +115,11 @@ def policy_result_many(ctx: WsContext, tenant: str, finding_id: str, settings: "
     return [gap_or_pass(tenant, finding_id, [f"{tenant}: {scope} - {describe(value)}" for scope, value in verdict.bad], detail)]
 
 
+def is_google_test_alias(domain: str) -> bool:
+    """Google creates ``<your domain>.test-google-a.com`` for every Workspace tenant so mail can be tested. It only receives."""
+    return domain.lower().rstrip(".").endswith(".test-google-a.com")
+
+
 def dns_check(ctx: WsContext, tenant: str, finding_id: str, per_domain: "Callable[[str, Any], Optional[str]]", detail: str) -> "list[ProjectResult]":
     """Run a DNS question for every domain of the tenant. ``per_domain(domain, resolver)`` returns a problem description or None.
 
@@ -123,7 +128,8 @@ def dns_check(ctx: WsContext, tenant: str, finding_id: str, per_domain: "Callabl
     if not ctx.options.check_dns or ctx.resolver is None:
         return [ProjectResult(tenant, finding_id, "NotAssessed", [], "DNS lookups were switched off (--no-dns), so this record was not checked.")]
     problems, failed = [], []
-    for domain in ctx.domains or [tenant]:
+    # Google's receive-only test alias (<domain>.test-google-a.com) cannot send mail, so SPF/DKIM/DMARC do not apply to it.
+    for domain in [d for d in (ctx.domains or [tenant]) if not is_google_test_alias(d)] or [tenant]:
         try:
             message = per_domain(domain, ctx.resolver)
         except ApiError as exc:

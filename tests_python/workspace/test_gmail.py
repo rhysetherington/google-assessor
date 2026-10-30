@@ -90,6 +90,8 @@ CASES = [
     ("GML-032 pass (not applicable): Gmail is off", "GML-032", "Pass", lambda t: t.settings.__setitem__("gmail.service_status", {"serviceState": "DISABLED"}), None, "switched off"),
     # --- DKIM ---
     ("GML-002 gap: no DKIM key", "GML-002", "Gap", dns({"google._domainkey": None}), None, "contoso.com"),
+    ("GML-002 pass: Google's receive-only test alias domain is not checked", "GML-002", "Pass", sub_domain("contoso.com.test-google-a.com"), None, None),
+    ("GML-003 pass: the test alias domain has no SPF and that is fine", "GML-003", "Pass", sub_domain("contoso.com.test-google-a.com"), None, None),
     ("GML-002 gap: revoked key (empty p=)", "GML-002", "Gap", dns({"google._domainkey": ["v=DKIM1; k=rsa; p="]}), None, None),
     ("GML-002 gap: a secondary domain has no key", "GML-002", "Gap", sub_domain("mail.contoso.com"), None, "mail.contoso.com"),
     ("GML-002 NotAssessed: DNS switched off", "GML-002", "NotAssessed", no_dns, WsOptions(check_dns=False), "--no-dns"),

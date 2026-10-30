@@ -294,6 +294,7 @@ on its `expires` date.
 | `HTTP 403 … insufficient` or a permission error for some checks | The account is not a Super Admin, or a scope was not granted. Sign in as a Super Admin and approve every permission |
 | `compare` says there are fewer than two saved assessments | It looks in `./GoogleAssessment` of the folder you run it from. `cd` into the tool's folder, or point at yours with `--root` |
 | `compare` says the one you picked is the most recent | Nothing is later than it to compare with. Pick an earlier one as the starting point |
+| A domain ending `.test-google-a.com` is listed under the tenant's domains | Google creates that receive-only test alias for every Workspace tenant. It cannot send mail, so the SPF, DKIM, DMARC, MTA-STS and TLS-RPT checks skip it. It is listed for completeness only |
 | Email checks (DKIM, SPF, DMARC, MTA-STS, TLS-RPT) are NotAssessed | You used `--no-dns`. Run again without it |
 | "Google returned no value for settings/…" on a few checks | The setting has never been changed, or the edition does not include it, and Google leaves it out. The tool only treats a missing value as a default where Google documents that default; otherwise it stays NotAssessed |
 | Cloud checks say the gcloud account has Owner or Editor | Use a Viewer plus Security Reviewer account, or `--impersonate-service-account`. Pass `--allow-elevated-account` only if you accept running as that account |
