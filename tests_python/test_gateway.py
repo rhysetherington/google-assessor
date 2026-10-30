@@ -5,9 +5,9 @@ import re
 import unittest
 from pathlib import Path
 
-from gcp_gap_assessment.gcloud import Gcloud, GcloudError, classify_error, is_read_only
+from google_gap_assessment.cloud.gcloud import Gcloud, GcloudError, classify_error, is_read_only
 
-PACKAGE = Path(__file__).parent.parent / "gcp_gap_assessment"
+PACKAGE = Path(__file__).parent.parent / "google_gap_assessment"
 
 
 class ReadOnlyGate(unittest.TestCase):
@@ -114,9 +114,35 @@ class SourceScan(unittest.TestCase):
             with self.subTest(file=path.name):
                 self.assertNotRegex(text, r"shell\s*=\s*True|os\.system|os\.popen|\beval\(|\bexec\(")
 
-    def test_only_the_gateway_and_connect_start_processes(self):
-        users = sorted(p.name for p in PACKAGE.rglob("*.py") if "subprocess" in p.read_text() and p.name != "__init__.py")
-        self.assertEqual(["gcloud.py"], users)
+    def test_only_the_gcloud_gateway_and_the_token_helper_start_processes(self):
+        users = sorted(p.relative_to(PACKAGE).as_posix() for p in PACKAGE.rglob("*.py") if "subprocess" in p.read_text() and p.name != "__init__.py")
+        self.assertEqual(["cloud/gcloud.py", "workspace/auth.py"], users)
+
+    def test_the_token_helper_runs_exactly_one_gcloud_command(self):
+        text = (PACKAGE / "workspace" / "auth.py").read_text()
+        self.assertEqual(1, len(re.findall(r'\[self\._path, "auth", "application-default", "print-access-token"\]', text)))
+        self.assertNotRegex(text, r"shell\s*=\s*True")
+
+    def test_every_http_request_in_the_package_is_a_get_except_one_token_introspection(self):
+        posts, seen = [], 0
+        for path in PACKAGE.rglob("*.py"):
+            text = path.read_text()
+            for call in re.findall(r"urllib\.request\.Request\((.*?)\)\s*(?:#[^\n]*)?\n", text, flags=re.S):
+                seen += 1
+                method = re.search(r'method="(\w+)"', call)
+                with self.subTest(file=path.name):
+                    self.assertIsNotNone(method, f"{path.name}: a Request without an explicit method")
+                if method and method.group(1) != "GET":
+                    posts.append((path.name, method.group(1)))
+            self.assertNotRegex(text, r"""method\s*=\s*["'](PUT|PATCH|DELETE)["']""")
+        self.assertGreaterEqual(seen, 3, "the scan must see client.py, mail_dns.py and auth.py")
+        # The only non-GET requests are OAuth housekeeping in auth.py: ask Google what a token holds, swap the sign-in code for a token,
+        # and revoke the token at the end. None of them touches tenant data.
+        self.assertEqual({"auth.py"}, {name for name, _ in posts})
+        auth_text = (PACKAGE / "workspace" / "auth.py").read_text()
+        urls = set(re.findall(r'"(https://[^"]+)"', auth_text))
+        self.assertTrue({"https://oauth2.googleapis.com/tokeninfo", "https://oauth2.googleapis.com/token", "https://oauth2.googleapis.com/revoke"} <= urls)
+        self.assertEqual({"POST"}, {method for _, method in posts})
 
 
 if __name__ == "__main__":

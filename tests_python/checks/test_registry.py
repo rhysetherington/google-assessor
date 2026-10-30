@@ -5,13 +5,12 @@ import io
 import unittest
 from contextlib import redirect_stdout
 
-from gcp_gap_assessment.__main__ import main
-from gcp_gap_assessment.assess import CHECK_INDEX, DOMAINS, resolve_checks, run_assessment
-from gcp_gap_assessment.checks.common import Context
-from gcp_gap_assessment.model import CONTROL_MAPPING, Options
+from google_gap_assessment.__main__ import main
+from google_gap_assessment.assess import CHECK_INDEX, DOMAINS, resolve_checks, run_assessment
+from google_gap_assessment.cloud.checks.common import Context
+from google_gap_assessment.model import CONTROL_MAPPING, Options
 from tests_python.fakes import PROJECT, FakeGcloud, add_binding, healthy
 
-PREFIX = {"Iam": "IAM", "Audit": "LOG", "Network": "NET", "Compute": "CMP", "Storage": "STO", "Sql": "SQL", "Kms": "KMS", "OrgPolicy": "ORG"}
 
 
 class Registry(unittest.TestCase):
@@ -32,17 +31,22 @@ class Registry(unittest.TestCase):
                     self.assertTrue((c.run.__doc__ or "").strip(), f"{c.id} ({domain}) needs a docstring saying what it checks")
 
     def test_mapping_domain_names_match_the_module(self):
-        names = {"Iam": "Identity and IAM", "Logging": "Logging and monitoring", "Network": "Networking", "Compute": "Compute Engine",
-                 "Storage": "Cloud Storage", "Sql": "Cloud SQL", "Kms": "Cloud KMS", "OrgPolicy": "Organization policy"}
-        for cid, domain in CHECK_INDEX.items():
-            with self.subTest(cid):
-                self.assertEqual(names[domain], CONTROL_MAPPING[cid]["domain"])
+        for domain, module in DOMAINS.items():
+            for chk in module.CHECKS:
+                with self.subTest(chk.id):
+                    self.assertEqual(module.DOMAIN_NAME, CONTROL_MAPPING[chk.id]["domain"])
+
+    def test_mapping_source_matches_the_target(self):
+        from google_gap_assessment.assess import CLOUD_DOMAINS, WORKSPACE_DOMAINS
+        for chk_id, domain in CHECK_INDEX.items():
+            with self.subTest(chk_id):
+                self.assertEqual("workspace" if domain in WORKSPACE_DOMAINS else "cloud", CONTROL_MAPPING[chk_id]["source"])
 
 
 class RedoOneCheck(unittest.TestCase):
     def test_only_runs_just_that_check_and_reads_less(self):
         full_g, one_g = FakeGcloud(healthy()), FakeGcloud(healthy())
-        from gcp_gap_assessment.checks import compute
+        from google_gap_assessment.cloud.checks import compute
         full = compute.collect(Context(full_g, Options()), [PROJECT])
         one = compute.collect(Context(one_g, Options()), [PROJECT], only={"CMP-006"})
         self.assertEqual(["CMP-006"], [f["FindingId"] for f in one])
@@ -50,7 +54,7 @@ class RedoOneCheck(unittest.TestCase):
         self.assertLess(len(one_g.calls), len(full_g.calls))  # CMP-006 needs only the instance list, not the project metadata
 
     def test_a_failure_in_one_check_does_not_take_its_neighbours_with_it(self):
-        from gcp_gap_assessment.checks import storage
+        from google_gap_assessment.cloud.checks import storage
         fx = healthy()
         from tests_python.fakes import DENIED
         fx["storage buckets get-iam-policy gs://data-bucket"] = DENIED
@@ -79,7 +83,7 @@ class RedoOneCheck(unittest.TestCase):
             resolve_checks(["IAM-003", "IAM-999"])
 
     def test_partial_runs_are_labelled_in_the_reports(self):
-        from gcp_gap_assessment import report
+        from google_gap_assessment import report
         a = run_assessment(FakeGcloud(healthy()), [PROJECT], check_ids=["IAM-003"], no_prompt=True)
         self.assertIn("PARTIAL ASSESSMENT", report.to_markdown(a))
         self.assertIn("PARTIAL ASSESSMENT", report.to_html(a))
@@ -93,7 +97,7 @@ class Cli(unittest.TestCase):
         with redirect_stdout(out):
             self.assertEqual(0, main(["--list-checks"], gcloud=None))
         lines = out.getvalue().strip().splitlines()
-        self.assertEqual(47, len(lines))
+        self.assertEqual(len(CONTROL_MAPPING), len(lines))
         self.assertTrue(any(line.startswith("IAM-003  Iam") for line in lines))
 
     def test_check_flag_redoes_one_check_from_the_command_line(self):

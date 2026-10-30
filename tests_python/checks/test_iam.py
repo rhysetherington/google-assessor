@@ -2,11 +2,11 @@
 failing case names the rule that regressed. An unreadable setting is NotAssessed, never a pass.
 
 To redo or extend one check, find its id below. The check itself is the function registered for that id in
-gcp_gap_assessment/checks/iam.py."""
+google_gap_assessment/checks/iam.py."""
 
 import unittest
 
-from gcp_gap_assessment.checks import iam as MODULE
+from google_gap_assessment.cloud.checks import iam as MODULE
 from tests_python.helpers import healthy_passes, run_cases, ANCIENT, DEFAULT_COMPUTE_SA, DENIED, DISABLED, KEYS_KEY, Options, RECENT, SA, add_binding, key
 
 # (name, finding id, expected status, mutate(fixtures), options, text that must appear in affected/detail)
