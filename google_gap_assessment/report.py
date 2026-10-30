@@ -63,6 +63,15 @@ table{width:100%;border-collapse:collapse;font-size:13.5px}th,td{padding:8px 10p
 .cols{columns:2 300px;column-gap:28px;list-style:none;margin:6px 0;padding:0}.cols li{break-inside:avoid;font-size:14px;padding-left:20px;position:relative}.cols li:before{content:"\\2713";position:absolute;left:0;color:var(--pass);font-weight:700}
 .meta{color:var(--mute);font-size:13px}
 footer{color:var(--mute);font-size:12.5px;margin-top:36px;padding-top:16px;border-top:1px solid var(--line)}
+.logo-wrap{display:inline-flex;background:#fff;border-radius:12px;padding:8px 14px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.18)}.logo-wrap img{display:block;max-height:46px;max-width:220px;width:auto;height:auto}
+.summary{font-size:16px;margin:0 0 6px}.summary+ul{margin:6px 0 14px 22px}.summary-note{color:var(--mute);margin:8px 0 18px}
+.donuts{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:700px){.donuts{grid-template-columns:1fr}}
+.donutbox{display:flex;gap:18px;align-items:center}.donutbox>div:last-child{flex:1}.donut{width:132px;height:132px;position:relative;flex:none}.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut circle{fill:none;stroke-width:14}.donut .seg{stroke:var(--c)}.donut .bg{stroke:var(--soft)}.donut .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.donut .mid b{font-size:26px;line-height:1}.donut .mid span{font-size:11.5px;color:var(--mute);margin-top:3px}
+.legend.col{flex-direction:column;gap:5px;margin:6px 0 0}
+.heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.tile{display:block;text-decoration:none;color:#fff;border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--pass) var(--m),var(--critical));text-shadow:0 1px 2px rgba(0,0,0,.35);min-height:92px}
+.tile:hover{filter:brightness(1.07)}.tile b{display:block;font-size:24px;line-height:1.15}.tile span{display:block;font-size:13px;font-weight:600;margin-bottom:2px}.tile small{display:block;font-size:12px;opacity:.92;margin-top:2px}
 @media print{body{background:#fff}.hero{padding:24px 0 36px;-webkit-print-color-adjust:exact;print-color-adjust:exact}main{margin-top:-24px}.tools{display:none!important}.card,details{break-inside:avoid;box-shadow:none}.bar i,.badge,.stat{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 """
 
@@ -74,6 +83,8 @@ fs.forEach(function(x){x.hidden=!(f==='all'||x.dataset.sev===f)});
 d.querySelectorAll('.domain').forEach(function(s){s.hidden=!s.querySelector('.finding:not([hidden])')})}
 bs.forEach(function(b){b.addEventListener('click',function(){apply(b.dataset.f)})});
 d.querySelectorAll('[data-open]').forEach(function(b){b.addEventListener('click',function(){var o=b.dataset.open==='1';d.querySelectorAll('#findings details').forEach(function(x){x.open=o})})});
+function go(){var t=d.getElementById(location.hash.slice(1));if(!t)return;for(var n=t;n;n=n.parentElement){if(n.tagName==='DETAILS')n.open=true}t.scrollIntoView()}
+addEventListener('hashchange',go);
 addEventListener('beforeprint',function(){d.querySelectorAll('details').forEach(function(x){x.open=true})});
 })();
 """
@@ -191,6 +202,55 @@ def _ring(score) -> str:
             f'<div class="num"><b>{escape("n/a" if score is None else f"{pct:g}%")}</b><span>score</span></div></div>')
 
 
+def _donut(parts: "list[tuple[str, int, str]]", centre: str, caption: str) -> str:
+    """Donut chart from (css class, count, title) parts. Pure SVG; the centre shows one headline number."""
+    circ, total, acc = 2 * 3.14159265 * 42, sum(n for _, n, _ in parts), 0.0
+    segs = ['<circle class="bg" cx="60" cy="60" r="42"/>']
+    for c, n, t in parts:
+        if not n:
+            continue
+        ln = n / total * circ
+        segs.append(f'<circle class="seg {c}" cx="60" cy="60" r="42" stroke-dasharray="{ln:.2f} {circ - ln:.2f}" stroke-dashoffset="{-acc:.2f}"><title>{escape(t)}: {n}</title></circle>')
+        acc += ln
+    return (f'<div class="donut" role="img" aria-label="{escape(caption)}"><svg viewBox="0 0 120 120">{"".join(segs)}</svg>'
+            f'<div class="mid"><b>{escape(centre)}</b><span>{escape(caption)}</span></div></div>')
+
+
+def logo_data_uri(path: str) -> str:
+    """Read a logo image into a data: URI so the report stays a single file. Raises ValueError with a plain message."""
+    import base64
+    mime = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml"}
+    p = Path(path).expanduser()
+    if p.suffix.lower() not in mime:
+        raise ValueError("--logo must be a .png, .jpg, .gif, .webp or .svg image.")
+    if not p.is_file():
+        raise ValueError(f"Logo file not found: {path}")
+    if p.stat().st_size > 400_000:
+        raise ValueError("The logo is larger than 400 KB; use a smaller image so the report stays light.")
+    return f"data:{mime[p.suffix.lower()]};base64,{base64.b64encode(p.read_bytes()).decode()}"
+
+
+def _executive_summary(a: dict, urgent: "list[dict]", n_areas: int) -> str:
+    """A few plain sentences for a non-technical reader, built from the numbers only (nothing is guessed)."""
+    e, s, score = escape, a["Summary"], a.get("Score")
+    kind = "Google Workspace" if a["Scope"].get("Workspace") and not a["Scope"].get("Projects") else (
+        "Google Cloud" if a["Scope"].get("Projects") and not a["Scope"].get("Workspace") else "Google Workspace and Google Cloud")
+    text = (f"We ran <b>{s['TotalChecks']}</b> read-only checks across <b>{n_areas}</b> areas of your {kind} environment. "
+            f"<b>{s['Passed']}</b> passed, <b>{s['Gaps']}</b> found a gap, and <b>{s['NotAssessed']}</b> could not be read.")
+    if score is not None:
+        tone = ("a generally strong baseline with a few items to tidy up" if score >= 80
+                else "a reasonable baseline with important gaps to close" if score >= 50
+                else "significant room to improve, starting with the items below")
+        text += f" The overall score of <b>{e(score_text(a))}</b> shows {tone}."
+    html = f'<p class="summary">{text}</p>'
+    if urgent:
+        html += '<p class="summary" style="margin-top:10px"><b>Fix these first:</b></p><ul>' + "".join(f"<li>{e(x['Name'])}</li>" for x in urgent[:3]) + "</ul>"
+    if s["NotAssessed"]:
+        html += (f'<p class="summary-note">{s["NotAssessed"]} checks could not be read, so the score may understate the true position until they are re-run. '
+                 'See &ldquo;Could not be assessed&rdquo; below for the reasons.</p>')
+    return html
+
+
 def _bar(parts: "list[tuple[str, int, str]]") -> str:
     """Stacked bar from (css class, count, title). Zero-width parts are skipped."""
     total = sum(n for _, n, _ in parts) or 1
@@ -209,7 +269,7 @@ def _not_assessed_groups(items: "list[dict]") -> "list[tuple[str, list[dict]]]":
     return sorted(groups.items(), key=lambda kv: -len(kv[1]))
 
 
-def to_html(a: dict, brand_color: "str | None" = None, evidence_root: "Path | None" = None) -> str:
+def to_html(a: dict, brand_color: "str | None" = None, evidence_root: "Path | None" = None, logo: "str | None" = None) -> str:
     e = escape
     f, sev, s, m = a["Findings"], a["Summary"]["GapsBySeverity"], a["Summary"], a["Metadata"]
     title = m.get("AssessmentName") or "Google Cloud Security Gap Assessment"
@@ -219,24 +279,26 @@ def to_html(a: dict, brand_color: "str | None" = None, evidence_root: "Path | No
     if m.get("AssessmentDate"): chips.append(e(m["AssessmentDate"]))
     if m.get("AssessorName"): chips.append("Assessor " + e(m["AssessorName"]) + (", " + e(m["PreparedBy"]) if m.get("PreparedBy") else ""))
     if m.get("Reference"): chips.append("Ref " + e(m["Reference"]))
+    urgent = sorted((x for x in f if x["Status"] == "Gap" and x["Severity"] in ("Critical", "High")), key=lambda x: (SEVERITY_ORDER[x["Severity"]], x["FindingId"]))
+    n_areas = len({x["Domain"] for x in f})
+    logo_html = (f'<div class="logo-wrap"><img src="{e(logo)}" alt="{e(client)} logo"></div>' if logo and logo.startswith("data:image/") else "")
     out = [f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)} - {e(client)}</title><style>{HTML_CSS}{accent}</style></head><body>
-<header class="hero"><div class="wrap"><div><div class="eyebrow">Security assessment</div><h1>{e(title)}</h1>
+<header class="hero"><div class="wrap"><div>{logo_html}<div class="eyebrow">Security assessment</div><h1>{e(title)}</h1>
 <div class="chips">{''.join(f'<span class="chip">{c}</span>' for c in chips)}</div>
 <p class="meta" style="color:rgba(255,255,255,.75);margin:14px 0 0;max-width:640px">{e(scope_text(a))}</p></div>{_ring(a.get('Score'))}</div></header>
-<main class="wrap"><section><div class="card"><div class="stats">
+<main class="wrap"><section><div class="card">{_executive_summary(a, urgent, n_areas)}<div class="stats">
 <div class="stat pass"><b>{s['Passed']}</b><span>checks passed</span></div>
 <div class="stat gap"><b>{s['Gaps']}</b><span>gaps found</span></div>
 <div class="stat na"><b>{s['NotAssessed']}</b><span>could not be assessed</span></div>
 {f'<div class="stat acc"><b>{s["Accepted"]}</b><span>accepted risks</span></div>' if s['Accepted'] else ''}
 <div class="stat"><b>{s['TotalChecks']}</b><span>checks run</span></div></div>
-<div class="grid2"><div><h3>Gaps by severity</h3>{_bar([("c-Critical", sev['Critical'], "Critical"), ("c-High", sev['High'], "High"), ("c-Medium", sev['Medium'], "Medium"), ("c-Low", sev['Low'], "Low")])}
-<div class="legend">{''.join(f'<span class="c-{k}">{k} {sev[k]}</span>' for k in ('Critical', 'High', 'Medium', 'Low'))}</div></div>
-<div><h3>All checks</h3>{_bar([("c-Pass", s['Passed'], "Passed"), ("c-Gap", s['Gaps'], "Gaps"), ("c-Not", s['NotAssessed'], "Not assessed"), ("c-Acc", s['Accepted'], "Accepted")])}
-<div class="legend"><span class="c-Pass">Passed {s['Passed']}</span><span class="c-Gap">Gaps {s['Gaps']}</span><span class="c-Not">Not assessed {s['NotAssessed']}</span></div></div></div>
+<div class="donuts"><div class="donutbox">{_donut([("c-Critical", sev['Critical'], "Critical"), ("c-High", sev['High'], "High"), ("c-Medium", sev['Medium'], "Medium"), ("c-Low", sev['Low'], "Low")], str(s['Gaps']), "gaps")}
+<div><h3>Gaps by severity</h3><div class="legend col">{''.join(f'<span class="c-{k}">{k} {sev[k]}</span>' for k in ('Critical', 'High', 'Medium', 'Low'))}</div></div></div>
+<div class="donutbox">{_donut([("c-Pass", s['Passed'], "Passed"), ("c-Gap", s['Gaps'], "Gaps"), ("c-Not", s['NotAssessed'], "Not assessed"), ("c-Acc", s['Accepted'], "Accepted")], str(s['Passed']), "passed")}
+<div><h3>All {s['TotalChecks']} checks</h3><div class="legend col"><span class="c-Pass">Passed {s['Passed']}</span><span class="c-Gap">Gaps {s['Gaps']}</span><span class="c-Not">Not assessed {s['NotAssessed']}</span></div></div></div></div>
 <p class="meta" style="margin:16px 0 0">A pass means the setting that was read looks right; it is not proof the environment is secure. Checks that could not be read count against the score and are never shown as passes.</p></div></section>"""]
 
-    urgent = sorted((x for x in f if x["Status"] == "Gap" and x["Severity"] in ("Critical", "High")), key=lambda x: (SEVERITY_ORDER[x["Severity"]], x["FindingId"]))
     if urgent:
         out.append('<section><div class="card"><h2>Start here</h2><p class="lead">The most serious gaps. Fixing these first removes the most risk.</p><div class="start">')
         for x in urgent:
@@ -247,13 +309,16 @@ def to_html(a: dict, brand_color: "str | None" = None, evidence_root: "Path | No
     by_domain: "dict[str, dict[str, int]]" = {}
     for x in f:
         by_domain.setdefault(x["Domain"], {"Pass": 0, "Gap": 0, "NotAssessed": 0, "Accepted": 0})[x["Status"]] += 1
+    # One anchor id per area, shared by the heat-map tiles and the findings below them.
+    area_id = {d: f"a-{i}" for i, d in enumerate(sorted({x["Domain"] for x in f}))}
     if len(by_domain) > 1:
-        out.append('<section><div class="card"><h2>By area</h2>')
-        for d, c in by_domain.items():
-            tot = sum(c.values())
-            out.append(f'<div class="dom"><span>{e(d)}</span>{_bar([("c-Pass", c["Pass"], "Passed"), ("c-Gap", c["Gap"], "Gaps"), ("c-Not", c["NotAssessed"], "Not assessed"), ("c-Acc", c["Accepted"], "Accepted")])}'
-                       f'<span class="n">{c["Pass"]}/{tot} pass</span></div>')
-        out.append("</div></section>")
+        out.append('<section><div class="card"><h2>By area</h2><p class="lead">Green means most checks in that area passed; red means most did not. Select an area to jump to its findings.</p><div class="heat">')
+        for d, c in sorted(by_domain.items(), key=lambda kv: (kv[1]["Pass"] / (sum(kv[1].values()) or 1), kv[0])):
+            tot = sum(c.values()) or 1
+            note = f'{c["Gap"]} gap{"s" if c["Gap"] != 1 else ""}' + (f' &middot; {c["NotAssessed"]} unread' if c["NotAssessed"] else "")
+            target = f' href="#{area_id[d]}"' if c["Gap"] else ""
+            out.append(f'<a class="tile"{target} style="--m:{c["Pass"] / tot * 100:.0f}%"><span>{e(d.split(": ", 1)[-1])}</span><b>{c["Pass"]}/{tot}</b><small>{note}</small></a>')
+        out.append("</div></div></section>")
 
     out.append('<section id="findings"><h2>Findings</h2>')
     # Most serious area first: by its worst severity, then by how many gaps it has, then by name.
@@ -267,7 +332,7 @@ def to_html(a: dict, brand_color: "str | None" = None, evidence_root: "Path | No
                    + '<span class="sp"></span><button type="button" data-open="1">Expand all</button><button type="button" data-open="0">Collapse all</button></div>')
     for domain, items in domains:
         worst = min(SEVERITY_ORDER[g_["Severity"]] for g_ in items)
-        out.append(f'<details class="domain"{" open" if worst <= SEVERITY_ORDER["High"] else ""}><summary>{e(domain)} <span class="count">{len(items)} gap{"s" if len(items) != 1 else ""}</span></summary><div class="body">')
+        out.append(f'<details class="domain" id="{area_id[domain]}"{" open" if worst <= SEVERITY_ORDER["High"] else ""}><summary>{e(domain)} <span class="count">{len(items)} gap{"s" if len(items) != 1 else ""}</span></summary><div class="body">')
         for g_ in sorted(items, key=lambda x: (SEVERITY_ORDER[x["Severity"]], x["FindingId"])):
             out.append(f'<details class="finding c-{g_["Severity"]}" id="f-{e(g_["FindingId"])}" data-sev="{g_["Severity"]}"><summary><span class="badge c-{g_["Severity"]}">{g_["Severity"]}</span>{e(g_["Name"])}</summary><div class="body" style="border:0">')
             if g_["Detail"]: out.append(f'<p class="why">{e(g_["Detail"])}</p>')
@@ -329,7 +394,7 @@ def protect(path: Path) -> None:
 
 
 def export(assessment: dict, export_path: Path, formats=("JSON", "Markdown", "HTML"), brand_color: "str | None" = None,
-           include_evidence: bool = False) -> "list[str]":
+           include_evidence: bool = False, logo: "str | None" = None) -> "list[str]":
     """Write the Findings JSON (always) plus Markdown and/or HTML. Returns the files written."""
     export_path = Path(export_path)
     export_path.mkdir(parents=True, exist_ok=True)
@@ -347,7 +412,7 @@ def export(assessment: dict, export_path: Path, formats=("JSON", "Markdown", "HT
         written.append(str(p))
     if "HTML" in formats:
         p = export_path / (f"{base}-Assessment.html" if base else "GCP_Security_Gap_Assessment.html")
-        p.write_text(to_html(assessment, brand_color, export_path), encoding="utf-8")
+        p.write_text(to_html(assessment, brand_color, export_path, logo), encoding="utf-8")
         written.append(str(p))
     protect(export_path)
     return written

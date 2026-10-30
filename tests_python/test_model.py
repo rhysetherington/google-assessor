@@ -226,3 +226,48 @@ class HtmlReport(unittest.TestCase):
         from google_gap_assessment.assess import run_assessment
         html = report.to_html(run_assessment(workspace=Tenant().session(), no_prompt=True))
         self.assertIsNone(re.search(r'(?:src|href)="https?://', html))  # no fonts, scripts or images fetched from anywhere
+
+
+class HtmlBranding(unittest.TestCase):
+    def _assessment(self):
+        from google_gap_assessment.assess import run_assessment
+        from tests_python.workspace.ws_fakes import Tenant
+        t = Tenant(); t.settings["gmail.auto_forwarding"] = {"enableAutoForwarding": True}
+        return run_assessment(workspace=t.session(), no_prompt=True, client_name="Acme")
+
+    def test_logo_is_embedded_as_a_data_uri_and_a_bad_one_is_refused(self):
+        import tempfile
+        from pathlib import Path
+        from google_gap_assessment import report
+        with tempfile.TemporaryDirectory() as d:
+            good = Path(d, "logo.svg"); good.write_text("<svg xmlns='http://www.w3.org/2000/svg'/>")
+            uri = report.logo_data_uri(str(good))
+            self.assertTrue(uri.startswith("data:image/svg+xml;base64,"))
+            self.assertIn('class="logo-wrap"', report.to_html(self._assessment(), logo=uri))
+            self.assertNotIn('class="logo-wrap"', report.to_html(self._assessment()))
+            for name, size in (("notes.txt", 10), ("big.png", 500_000)):
+                Path(d, name).write_bytes(b"x" * size)
+                with self.assertRaises(ValueError):
+                    report.logo_data_uri(str(Path(d, name)))
+            with self.assertRaises(ValueError):
+                report.logo_data_uri(str(Path(d, "missing.png")))
+
+    def test_a_logo_that_is_not_a_data_uri_is_never_rendered(self):
+        from google_gap_assessment import report
+        html = report.to_html(self._assessment(), logo='javascript:alert(1)"><script>alert(1)</script>')
+        self.assertNotIn('class="logo-wrap"', html)
+        self.assertNotIn("<script>alert", html)
+
+    def test_executive_summary_states_the_numbers_and_the_top_risks(self):
+        from google_gap_assessment import report
+        a = self._assessment()
+        html = report.to_html(a)
+        self.assertIn(f"<b>{a['Summary']['TotalChecks']}</b> read-only checks", html)
+        self.assertIn("Fix these first:", html)
+
+    def test_every_gap_area_has_an_anchor_the_heat_map_can_link_to(self):
+        import re
+        from google_gap_assessment import report
+        html = report.to_html(self._assessment())
+        for target in re.findall(r'class="tile" href="#(a-\d+)"', html):
+            self.assertIn(f'id="{target}"', html)

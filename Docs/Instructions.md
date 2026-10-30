@@ -99,6 +99,7 @@ Useful options:
 | `--no-prompt` | Do not ask for report details (use this in scripts) |
 | `--client-name`, `--assessor-name`, `--assessment-date`, `--reference` | Give the report details up front |
 | `--brand-color "#RRGGBB"` | Accent colour for the HTML report |
+| `--logo FILE` | Put your or your client's logo (`.png`, `.jpg`, `.gif`, `.webp` or `.svg`, up to 400 KB) in the HTML report header. The image is embedded, so the report stays one file |
 | `--include-evidence` | Also write one CSV per finding listing every affected user, group or resource |
 | `--export-path FOLDER` | Where reports go (default `./GoogleAssessment`) |
 | `--check GID-005 GML-028` | Redo only those checks (see section 6) |

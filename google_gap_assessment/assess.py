@@ -162,11 +162,11 @@ def run_assessment(gcloud: "Gcloud | None" = None, project_ids=(), folder_id=Non
     }
 
 
-def export_assessment(assessment: dict, export_path, formats=("JSON", "Markdown", "HTML"), brand_color=None, include_evidence=False) -> "list[str]":
+def export_assessment(assessment: dict, export_path, formats=("JSON", "Markdown", "HTML"), brand_color=None, include_evidence=False, logo=None) -> "list[str]":
     """Write the reports into <export_path>/<ClientName>-<date>/ (a clock suffix is added if that folder already exists)."""
     folder = Path(export_path) / metadata.base_name(assessment)
     if folder.exists():
         folder = Path(export_path) / f"{metadata.base_name(assessment)}-{datetime.now().strftime('%H%M')}"
-    files = report.export(assessment, folder, formats, brand_color, include_evidence)
+    files = report.export(assessment, folder, formats, brand_color, include_evidence, logo)
     assessment["ExportedFiles"] = files
     return files

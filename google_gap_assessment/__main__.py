@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import __version__
+from . import __version__, report
 from .assess import (CHECK_INDEX, CLOUD_DOMAINS, DEFAULT_CLOUD_DOMAINS, DEFAULT_WORKSPACE_DOMAINS, DOMAINS, SCOPES, WORKSPACE_DOMAINS,
                      export_assessment, resolve_checks, run_assessment)
 from .cloud.gcloud import Gcloud
@@ -55,6 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
                        ("--assessment-date", "assessment_date"), ("--reference", "reference"), ("--prepared-by", "prepared_by")):
         r.add_argument(flag, dest=dest, metavar="TEXT")
     r.add_argument("--brand-color", metavar="#RRGGBB", help="accent colour of the HTML report")
+    r.add_argument("--logo", metavar="FILE", help="your or your client's logo (.png .jpg .gif .webp .svg, up to 400 KB), embedded in the HTML report header")
     r.add_argument("--no-prompt", action="store_true", help="do not ask for the assessment details; use the arguments and defaults")
     r.add_argument("--include-evidence", action="store_true", help="also write evidence/<FindingId>.csv with every affected item")
     r.add_argument("--no-export", action="store_true", help="print the summary only; write no files")
@@ -107,6 +108,12 @@ def main(argv: "list[str] | None" = None, gcloud: "Gcloud | None" = None, worksp
             parser.error(f"{flag} must be a number.")
     if args.impersonate_service_account and not is_service_account_email(args.impersonate_service_account):
         parser.error("--impersonate-service-account must look like name@project-id.iam.gserviceaccount.com.")
+    logo = None
+    if args.logo:
+        try:
+            logo = report.logo_data_uri(args.logo)
+        except ValueError as exc:
+            parser.error(str(exc))
     if args.brand_color and not (len(args.brand_color) == 7 and args.brand_color.startswith("#")):
         parser.error("--brand-color must be #RRGGBB.")
 
@@ -149,7 +156,7 @@ def main(argv: "list[str] | None" = None, gcloud: "Gcloud | None" = None, worksp
     print(f"Score {assessment['Score']}%  |  {s['TotalChecks']} checks: {s['Passed']} passed, {s['Gaps']} gaps, "
           f"{s['NotAssessed']} not assessed, {s['Accepted']} accepted")
     if not args.no_export:
-        for f in export_assessment(assessment, Path(args.export_path), args.format, args.brand_color, args.include_evidence):
+        for f in export_assessment(assessment, Path(args.export_path), args.format, args.brand_color, args.include_evidence, logo):
             print(f"  wrote {f}")
     return 0
 
