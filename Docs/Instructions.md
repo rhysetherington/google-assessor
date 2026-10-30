@@ -212,6 +212,17 @@ Other ways to run it:
 Checks are matched by id. If the later run could read more checks than the earlier one, the score moves for that reason too, so read the
 "Now assessed" section alongside the score change. Runs that only redid a few checks are marked **[PARTIAL]** in the list.
 
+**Choose a trustworthy starting point.** A comparison is only as good as the assessment it starts from. Before you pick one:
+
+* Open its report and check the **Could not be assessed** count. A run where most checks could not be read (for example, a first run
+  before the Admin SDK and Cloud Identity APIs were enabled) scores very low for that reason, not because the tenant is weak.
+  Comparing against it makes later results look better than they are.
+* Runs made with an earlier, faulty version of the tool, or while setup was incomplete, should not be used as a baseline.
+* The list shows every folder under `GoogleAssessment/`. To keep it clean, **move** unreliable runs out (for example into
+  `GoogleAssessment-archive/`) rather than deleting them. `compare` only looks inside the folder given by `--root`.
+* Starting a new baseline after a major change is fine. Compare against the run that best matches the question you are asking, such as
+  "what changed since the last review" or "what changed since the engagement began".
+
 ---
 
 ## 7. Recording accepted risks
@@ -238,6 +249,7 @@ on its `expires` date.
 | `The access token has none of the read-only Workspace scopes` | You used a plain `gcloud` sign-in. Use `--oauth-client-file` (section 2) |
 | A warning that the sign-in "can do more than read" | A `gcloud auth application-default login` token is being used. It carries the broad `cloud-platform` permission. Revoke it with `gcloud auth application-default revoke` and use `--oauth-client-file` |
 | `HTTP 403 … insufficient` or a permission error for some checks | The account is not a Super Admin, or a scope was not granted. Sign in as a Super Admin and approve every permission |
+| `compare` says there are fewer than two saved assessments | It looks in `./GoogleAssessment` of the folder you run it from. `cd` into the tool's folder, or point at yours with `--root` |
 | Email checks (DKIM, SPF, DMARC, MTA-STS, TLS-RPT) are NotAssessed | You used `--no-dns`. Run again without it |
 | "Google returned no value for settings/…" on a few checks | The setting has never been changed, or the edition does not include it, and Google leaves it out. The tool only treats a missing value as a default where Google documents that default; otherwise it stays NotAssessed |
 | Cloud checks say the gcloud account has Owner or Editor | Use a Viewer plus Security Reviewer account, or `--impersonate-service-account`. Pass `--allow-elevated-account` only if you accept running as that account |
