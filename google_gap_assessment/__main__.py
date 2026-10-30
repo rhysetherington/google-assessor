@@ -27,7 +27,12 @@ MENU = """What would you like to assess?
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="google_gap_assessment", description="Read-only Google Workspace and Google Cloud security gap assessment.")
+    p = argparse.ArgumentParser(
+        prog="google_gap_assessment", description="Read-only Google Workspace and Google Cloud security gap assessment.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="Commands:\n  (none) or 'assess'   run an assessment (this page lists its options)\n"
+               "  compare              compare two saved assessments, earlier on the left and later on the right.\n"
+               "                       Run 'python3 -m google_gap_assessment compare' to choose one from a list; --help for options.")
     p.add_argument("--scope", choices=SCOPES, help="what to assess: workspace, both (Workspace and Google Cloud) or cloud. Asked for when omitted.")
     p.add_argument("--setup-help", action="store_true", help="print the one-time Google Workspace sign-in setup and exit")
     g = p.add_argument_group("Google Workspace")
@@ -92,6 +97,11 @@ def choose_scope(args, interactive: bool, ask=input) -> str:
 
 
 def main(argv: "list[str] | None" = None, gcloud: "Gcloud | None" = None, workspace=None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "compare":  # the second command: it needs no sign-in and no gcloud
+        return compare.main(argv[1:])
+    if argv and argv[0] == "assess":   # the first command; plain invocation without a word still means this
+        argv = argv[1:]
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.setup_help:

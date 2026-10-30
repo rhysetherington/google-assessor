@@ -37,6 +37,9 @@ cd google-assessor
 python3 -m google_gap_assessment            # asks: Workspace only / Workspace and Cloud / Cloud only
 ```
 
+**Two commands:** `python3 -m google_gap_assessment` runs an assessment; `python3 -m google_gap_assessment compare` lets you choose a saved
+assessment and compare it with a later one, earlier on the left and later on the right (see [`Docs/Instructions.md`](Docs/Instructions.md)).
+
 ### Google Workspace
 
 Reading a Workspace tenant needs a **Super Admin** to sign in. The tool does the sign-in itself (it opens your browser), using an OAuth client

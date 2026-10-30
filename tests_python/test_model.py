@@ -318,3 +318,82 @@ class Comparison(unittest.TestCase):
             with redirect_stderr(io.StringIO()) as err:
                 self.assertEqual(1, compare.main([str(bad), str(bad)]))
             self.assertIn("not an assessment Findings file", err.getvalue())
+
+
+class CompareCommand(unittest.TestCase):
+    """The second command: choose a saved assessment to start from and compare it with a later one."""
+
+    def setUp(self):
+        import json, tempfile
+        from pathlib import Path
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        for folder, at, score in (("Acme-old", "2026-10-01T10:00:00+00:00", 30.0), ("Acme-mid", "2026-10-10T10:00:00+00:00", 50.0), ("Acme-new", "2026-10-20T10:00:00+00:00", 70.0)):
+            (self.root / folder).mkdir()
+            (self.root / folder / f"{folder}-Findings.json").write_text(json.dumps({
+                "Findings": [{"FindingId": "A", "Name": "Check A", "Severity": "High", "Status": "Gap" if score < 60 else "Pass", "AffectedCount": 1, "Detail": ""}],
+                "Score": score, "AssessedAt": at, "Metadata": {"ClientName": "Acme", "AssessmentDate": at[:10]},
+                "Scope": {"Workspace": {"PrimaryDomain": "acme.example"}}, "Summary": {"Passed": 0, "Gaps": 1, "NotAssessed": 0, "TotalChecks": 1}}))
+        (self.root / "junk").mkdir(); (self.root / "junk" / "junk-Findings.json").write_text("not json")
+
+    def _run(self, argv, answers=(), interactive=True):
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+        from google_gap_assessment import compare
+        it = iter(answers)
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = compare.main(argv + ["--root", str(self.root)], ask=lambda _p: next(it), interactive=interactive)
+        return code, out.getvalue(), err.getvalue()
+
+    def test_saved_assessments_are_found_newest_first_and_junk_is_skipped(self):
+        from google_gap_assessment import compare
+        self.assertEqual(["Acme-new", "Acme-mid", "Acme-old"], [r["folder"] for r in compare.discover(self.root)])
+
+    def test_the_assessor_picks_the_start_and_the_newest_is_the_default_comparison(self):
+        code, out, _ = self._run([], ["3", ""])  # 3 = the oldest in a newest-first list; Enter accepts the default
+        self.assertEqual(0, code)
+        self.assertIn("30.0% -> 70.0%", out)
+        self.assertTrue((self.root / "Acme-new" / "Acme-new-Comparison-from-Acme-old.html").exists())
+
+    def test_the_assessor_can_pick_a_different_assessment_to_compare_with(self):
+        code, out, _ = self._run([], ["3", "2"])  # later list is [new, mid]; 2 = mid
+        self.assertEqual(0, code)
+        self.assertIn("30.0% -> 50.0%", out)
+
+    def test_starting_from_the_newest_is_refused_because_nothing_is_later(self):
+        code, _, err = self._run([], ["1"])
+        self.assertEqual(1, code)
+        self.assertIn("most recent", err)
+
+    def test_two_given_assessments_are_compared_with_the_earlier_on_the_left_even_if_given_backwards(self):
+        code, out, _ = self._run([str(self.root / "Acme-new"), str(self.root / "Acme-old")], interactive=False)
+        self.assertEqual(0, code)
+        self.assertIn("swapped", out)
+        self.assertIn("30.0% -> 70.0%", out)
+
+    def test_without_arguments_and_without_a_terminal_it_says_what_to_do(self):
+        code, _, err = self._run([], interactive=False)
+        self.assertEqual(1, code)
+        self.assertIn("BEFORE AFTER", err)
+
+    def test_one_given_assessment_is_compared_with_the_most_recent(self):
+        code, out, _ = self._run([str(self.root / "Acme-mid")], interactive=False)
+        self.assertEqual(0, code)
+        self.assertIn("50.0% -> 70.0%", out)
+
+    def test_the_same_assessment_twice_is_refused(self):
+        code, _, err = self._run([str(self.root / "Acme-mid"), str(self.root / "Acme-mid")], interactive=False)
+        self.assertEqual(1, code)
+        self.assertIn("same assessment", err)
+
+    def test_the_main_command_routes_compare_and_still_treats_a_bare_run_as_assess(self):
+        import io
+        from contextlib import redirect_stdout
+        from google_gap_assessment.__main__ import main
+        with redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(0, main(["compare", "--list", "--root", str(self.root)]))
+        self.assertIn("Acme-new", out.getvalue())
+        with redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(0, main(["assess", "--list-checks"]))
+        self.assertIn("GID-001", out.getvalue())

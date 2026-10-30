@@ -180,19 +180,37 @@ mistaken for a full one.
 
 ---
 
-### Comparing two runs
+### The two commands
 
-After a client fixes things, re-run and compare. This writes the new reports plus a before/after page:
+| Command | What it does |
+|---|---|
+| `python3 -m google_gap_assessment` (or `… assess`) | **Runs an assessment** and writes the reports. Needs a sign-in |
+| `python3 -m google_gap_assessment compare` | **Compares two saved assessments.** Needs no sign-in and reads nothing from Google |
+
+### Comparing assessments
+
+After a client fixes things, run a new assessment, then compare it with an earlier one:
 
 ```bash
-python3 -m google_gap_assessment --scope workspace --oauth-client-file ~/.config/client_secret.json \
-  --compare-with GoogleAssessment/ClientName-2026-10-25/ClientName-2026-10-25-Findings.json
+python3 -m google_gap_assessment compare
 ```
 
-You can also compare two saved runs later without signing in:
-`python3 -m google_gap_assessment.compare BEFORE-Findings.json AFTER-Findings.json`.
+It lists the assessments saved in `GoogleAssessment/` (newest first, with date, client, score and scope) and asks you to **choose the one
+to start from**. It then asks what to compare it with; press Enter for the most recent. The page is written next to the later assessment
+as `…-Comparison-from-<starting folder>.html`, with the earlier assessment on the left and the later one on the right.
+
+Other ways to run it:
+
+| Command | Result |
+|---|---|
+| `compare --list` | Show the saved assessments and stop |
+| `compare FOLDER_OR_FINDINGS_JSON` | Compare that one with the most recent |
+| `compare BEFORE AFTER` | Compare two you name (a report folder or its `…-Findings.json`) |
+| `compare --root OTHER_FOLDER` | Look for assessments somewhere other than `./GoogleAssessment` |
+| `assess … --compare-with FILE` | Run a new assessment and compare it with `FILE` in one step |
+
 Checks are matched by id. If the later run could read more checks than the earlier one, the score moves for that reason too, so read the
-"Now assessed" section alongside the score change.
+"Now assessed" section alongside the score change. Runs that only redid a few checks are marked **[PARTIAL]** in the list.
 
 ---
 

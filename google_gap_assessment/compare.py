@@ -170,21 +170,111 @@ def _load(path: str) -> dict:
     return data
 
 
-def main(argv: "list[str] | None" = None) -> int:
-    ap = argparse.ArgumentParser(prog="google_gap_assessment.compare", description="Compare two assessments: earlier on the left, later on the right.")
-    ap.add_argument("before", help="the earlier assessment's *-Findings.json")
-    ap.add_argument("after", help="the later assessment's *-Findings.json")
-    ap.add_argument("--out", metavar="FILE", help="where to write the HTML (default: next to the later file, *-Comparison.html)")
+def discover(root: "str | Path") -> "list[dict]":
+    """Every saved assessment under ``root`` (one ``*-Findings.json`` per report folder), newest first. Unreadable files are skipped."""
+    found = []
+    for path in sorted(Path(root).expanduser().glob("*/*-Findings.json")):
+        try:
+            data = _load(str(path))
+        except ValueError:
+            continue
+        m, sc = data.get("Metadata") or {}, data.get("Scope") or {}
+        targets = [n for n, on in (("Workspace", sc.get("Workspace")), ("Cloud", sc.get("Projects"))) if on]
+        found.append({"path": path, "folder": path.parent.name, "client": m.get("ClientName") or "", "name": m.get("AssessmentName") or "",
+                      "date": _when(data), "at": str(data.get("AssessedAt", "")), "score": data.get("Score"), "checks": data["Summary"].get("TotalChecks"),
+                      "scope": " + ".join(targets) or "unknown", "partial": bool(data.get("OnlyChecks")), "data": data})
+    return sorted(found, key=lambda r: r["at"], reverse=True)
+
+
+def describe(r: dict) -> str:
+    score = "n/a" if r["score"] is None else f"{r['score']}%"
+    return (f"{r['date']}  {r['client'] or '(no client)'}  |  {r['name'] or 'assessment'}  |  {score}, {r['checks']} checks, {r['scope']}"
+            f"{'  [PARTIAL]' if r['partial'] else ''}  ({r['folder']})")
+
+
+def pick(items: "list[dict]", prompt: str, ask, default: "int | None" = None) -> dict:
+    """Show a numbered list and return the chosen item. Enter accepts ``default`` (a 1-based number) when there is one."""
+    for i, r in enumerate(items, 1):
+        print(f"  {i:>2}) {describe(r)}")
+    while True:
+        answer = ask(f"{prompt}{f' [{default}]' if default else ''}: ").strip()
+        if not answer and default:
+            return items[default - 1]
+        if answer.isdigit() and 1 <= int(answer) <= len(items):
+            return items[int(answer) - 1]
+        print(f"Please type a number from 1 to {len(items)}.")
+
+
+def output_path(start: dict, end: dict, out: "str | None" = None) -> Path:
+    """Where the page goes: next to the later assessment, named for both so comparing different starting points never overwrites."""
+    if out:
+        return Path(out).expanduser()
+    base = end["path"].name.replace("-Findings.json", "")
+    return end["path"].with_name(f"{base}-Comparison-from-{start['folder']}.html")
+
+
+def _entry(path: str) -> dict:
+    """An assessment given by file or by its report folder, in the same shape ``discover`` returns."""
+    p = Path(path).expanduser()
+    if p.is_dir():
+        files = sorted(p.glob("*-Findings.json"))
+        if len(files) != 1:
+            raise ValueError(f"{path} should hold exactly one *-Findings.json file (found {len(files)}).")
+        p = files[0]
+    data = _load(str(p))
+    m = data.get("Metadata") or {}
+    return {"path": p, "folder": p.parent.name, "data": data, "at": str(data.get("AssessedAt", "")), "date": _when(data), "client": m.get("ClientName") or ""}
+
+
+def main(argv: "list[str] | None" = None, ask=input, interactive: "bool | None" = None) -> int:
+    ap = argparse.ArgumentParser(
+        prog="google_gap_assessment compare",
+        description="Compare two saved assessments, earlier on the left and later on the right. With no arguments you are shown your saved "
+                    "assessments and choose the one to start from.")
+    ap.add_argument("before", nargs="?", help="the starting (earlier) assessment: its *-Findings.json or its report folder")
+    ap.add_argument("after", nargs="?", help="the assessment to compare it with (default: the most recent one)")
+    ap.add_argument("--root", default="GoogleAssessment", metavar="FOLDER", help="where saved assessments live (default: ./GoogleAssessment)")
+    ap.add_argument("--list", action="store_true", help="list the saved assessments and exit")
+    ap.add_argument("--out", metavar="FILE", help="where to write the HTML (default: next to the later assessment)")
     args = ap.parse_args(argv)
+    interactive = sys.stdin.isatty() if interactive is None else interactive
     try:
-        before, after = _load(args.before), _load(args.after)
+        saved = discover(args.root)
+        if args.list:
+            if not saved:
+                print(f"No saved assessments found under {args.root}.")
+            for i, r in enumerate(saved, 1):
+                print(f"  {i:>2}) {describe(r)}")
+            return 0
+        if args.before:
+            start = _entry(args.before)
+            end = _entry(args.after) if args.after else (saved[0] if saved else None)
+            if end is None:
+                raise ValueError(f"No saved assessments found under {args.root} to compare with; give the second file.")
+        else:
+            if len(saved) < 2:
+                raise ValueError(f"Found {len(saved)} saved assessment(s) under {args.root}; comparing needs at least two. "
+                                 "Run an assessment first, or point to another folder with --root.")
+            if not interactive:
+                raise ValueError("Say which assessments to compare (BEFORE AFTER), or run this in a terminal to choose from a list.")
+            print(f"Saved assessments under {args.root} (newest first):")
+            start = pick(saved, "Start from which assessment? Enter its number", ask)
+            later = [r for r in saved if r["at"] > start["at"]]
+            if not later:
+                raise ValueError("That is the most recent assessment, so there is nothing later to compare it with. Choose an earlier one.")
+            print("\nCompare it with:")
+            end = pick(later, "Number of the assessment to compare with", ask, default=1)
+        if start["path"].resolve() == end["path"].resolve():
+            raise ValueError("Those are the same assessment. Choose two different ones.")
+        if start["at"] > end["at"]:  # the assessor picked them the wrong way round; the left side is always the earlier run
+            start, end = end, start
+            print("Note: swapped them so the earlier assessment is on the left.")
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
-    out = Path(args.out) if args.out else Path(args.after).expanduser().with_name(Path(args.after).name.replace("-Findings.json", "") + "-Comparison.html")
-    write_comparison(before, after, out)
-    g = compare(before, after)["groups"]
-    print(f"Score {score_text(before)} -> {score_text(after)} | fixed {len(g['fixed'])}, got worse {len(g['regressed'])}, "
+    out = write_comparison(start["data"], end["data"], output_path(start, end, args.out))
+    g = compare(start["data"], end["data"])["groups"]
+    print(f"\nScore {score_text(start['data'])} -> {score_text(end['data'])} | fixed {len(g['fixed'])}, got worse {len(g['regressed'])}, "
           f"still open {len(g['open']) + len(g['worsened']) + len(g['improved'])}, newly assessed {len(g['now_assessed'])}")
     print(f"  wrote {out}")
     return 0
