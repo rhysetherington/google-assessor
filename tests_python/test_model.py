@@ -271,3 +271,50 @@ class HtmlBranding(unittest.TestCase):
         html = report.to_html(self._assessment())
         for target in re.findall(r'class="tile" href="#(a-\d+)"', html):
             self.assertIn(f'id="{target}"', html)
+
+
+class Comparison(unittest.TestCase):
+    @staticmethod
+    def _f(fid, status, affected=0, sev="High"):
+        return {"FindingId": fid, "Name": f"Check {fid}", "Severity": sev, "Status": status, "AffectedCount": affected, "Detail": ""}
+
+    def _a(self, findings, score):
+        passed = sum(1 for f in findings if f["Status"] == "Pass")
+        return {"Findings": findings, "Score": score, "Metadata": {"ClientName": "Acme", "AssessmentDate": "2026-10-25"},
+                "AssessedAt": "2026-10-25T10:00:00+00:00",
+                "Summary": {"Passed": passed, "Gaps": sum(1 for f in findings if f["Status"] == "Gap"),
+                            "NotAssessed": sum(1 for f in findings if f["Status"] == "NotAssessed")}}
+
+    def test_every_kind_of_change_is_classified(self):
+        from google_gap_assessment.compare import classify
+        f = self._f
+        cases = [(f("A", "Gap"), f("A", "Pass"), "fixed"), (f("A", "Pass"), f("A", "Gap"), "regressed"),
+                 (f("A", "NotAssessed"), f("A", "Pass"), "now_assessed"), (f("A", "Gap"), f("A", "NotAssessed"), "lost"),
+                 (f("A", "Gap", 5), f("A", "Gap", 2), "improved"), (f("A", "Gap", 2), f("A", "Gap", 5), "worsened"),
+                 (f("A", "Gap", 3), f("A", "Gap", 3), "open"), (f("A", "Pass"), f("A", "Pass"), "same"),
+                 (f("A", "NotAssessed"), f("A", "NotAssessed"), "same"), (None, f("A", "Gap"), "added"), (f("A", "Gap"), None, "removed"),
+                 (f("A", "Gap"), f("A", "Accepted"), "fixed")]
+        for old, new, want in cases:
+            self.assertEqual(want, classify(old, new), (old, new))
+
+    def test_page_shows_both_scores_the_delta_and_escapes_names(self):
+        from google_gap_assessment import compare
+        before = self._a([self._f("A", "Gap"), self._f("B", "Pass")], 40.0)
+        evil = self._f("B", "Gap"); evil["Name"] = "<img src=x onerror=alert(1)>"
+        after = self._a([self._f("A", "Pass"), evil], 55.5)
+        html = compare.to_html(before, after)
+        self.assertIn("+15.5 pts", html)
+        self.assertIn("Got worse", html)
+        self.assertIn("&lt;img src=x", html)
+        self.assertNotIn("<img src=x", html)
+
+    def test_cli_refuses_a_file_that_is_not_an_assessment(self):
+        import io, tempfile
+        from contextlib import redirect_stderr
+        from pathlib import Path
+        from google_gap_assessment import compare
+        with tempfile.TemporaryDirectory() as d:
+            bad = Path(d, "x.json"); bad.write_text('{"hello": 1}')
+            with redirect_stderr(io.StringIO()) as err:
+                self.assertEqual(1, compare.main([str(bad), str(bad)]))
+            self.assertIn("not an assessment Findings file", err.getvalue())

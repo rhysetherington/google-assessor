@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
-from . import __version__, report
+from . import __version__, compare, report
 from .assess import (CHECK_INDEX, CLOUD_DOMAINS, DEFAULT_CLOUD_DOMAINS, DEFAULT_WORKSPACE_DOMAINS, DOMAINS, SCOPES, WORKSPACE_DOMAINS,
                      export_assessment, resolve_checks, run_assessment)
 from .cloud.gcloud import Gcloud
@@ -55,6 +56,7 @@ def build_parser() -> argparse.ArgumentParser:
                        ("--assessment-date", "assessment_date"), ("--reference", "reference"), ("--prepared-by", "prepared_by")):
         r.add_argument(flag, dest=dest, metavar="TEXT")
     r.add_argument("--brand-color", metavar="#RRGGBB", help="accent colour of the HTML report")
+    r.add_argument("--compare-with", metavar="FILE", help="an earlier assessment's *-Findings.json; also writes a before/after comparison page (earlier on the left)")
     r.add_argument("--logo", metavar="FILE", help="your or your client's logo (.png .jpg .gif .webp .svg, up to 400 KB), embedded in the HTML report header")
     r.add_argument("--no-prompt", action="store_true", help="do not ask for the assessment details; use the arguments and defaults")
     r.add_argument("--include-evidence", action="store_true", help="also write evidence/<FindingId>.csv with every affected item")
@@ -108,6 +110,12 @@ def main(argv: "list[str] | None" = None, gcloud: "Gcloud | None" = None, worksp
             parser.error(f"{flag} must be a number.")
     if args.impersonate_service_account and not is_service_account_email(args.impersonate_service_account):
         parser.error("--impersonate-service-account must look like name@project-id.iam.gserviceaccount.com.")
+    before = None
+    if args.compare_with:  # fail now, not after the sign-in and the whole run
+        try:
+            before = compare._load(args.compare_with)
+        except ValueError as exc:
+            parser.error(str(exc))
     logo = None
     if args.logo:
         try:
@@ -156,8 +164,15 @@ def main(argv: "list[str] | None" = None, gcloud: "Gcloud | None" = None, worksp
     print(f"Score {assessment['Score']}%  |  {s['TotalChecks']} checks: {s['Passed']} passed, {s['Gaps']} gaps, "
           f"{s['NotAssessed']} not assessed, {s['Accepted']} accepted")
     if not args.no_export:
-        for f in export_assessment(assessment, Path(args.export_path), args.format, args.brand_color, args.include_evidence, logo):
+        files = export_assessment(assessment, Path(args.export_path), args.format, args.brand_color, args.include_evidence, logo)
+        for f in files:
             print(f"  wrote {f}")
+        if before is not None:
+            after = json.loads(Path(next(f for f in files if f.endswith("-Findings.json"))).read_text(encoding="utf-8"))
+            cmp_path = Path(files[0]).parent / (Path(next(f for f in files if f.endswith("-Findings.json"))).name.replace("-Findings.json", "") + "-Comparison.html")
+            print(f"  wrote {compare.write_comparison(before, after, cmp_path)}")
+    elif before is not None:
+        print("note: --compare-with needs the reports to be written, so no comparison was made (--no-export).")
     return 0
 
 

@@ -99,6 +99,7 @@ Useful options:
 | `--no-prompt` | Do not ask for report details (use this in scripts) |
 | `--client-name`, `--assessor-name`, `--assessment-date`, `--reference` | Give the report details up front |
 | `--brand-color "#RRGGBB"` | Accent colour for the HTML report |
+| `--compare-with FILE` | Give an earlier run's `…-Findings.json`. After the new run it also writes `…-Comparison.html`: the earlier assessment on the left, the new one on the right, with what was fixed, what got worse and what is still open |
 | `--logo FILE` | Put your or your client's logo (`.png`, `.jpg`, `.gif`, `.webp` or `.svg`, up to 400 KB) in the HTML report header. The image is embedded, so the report stays one file |
 | `--include-evidence` | Also write one CSV per finding listing every affected user, group or resource |
 | `--export-path FOLDER` | Where reports go (default `./GoogleAssessment`) |
@@ -176,6 +177,22 @@ python3 -m google_gap_assessment --check GML-028 GID-005 --oauth-client-file ~/.
 
 Only the areas that own those checks run, and only that data is read. The report is stamped **PARTIAL ASSESSMENT** so it cannot be
 mistaken for a full one.
+
+---
+
+### Comparing two runs
+
+After a client fixes things, re-run and compare. This writes the new reports plus a before/after page:
+
+```bash
+python3 -m google_gap_assessment --scope workspace --oauth-client-file ~/.config/client_secret.json \
+  --compare-with GoogleAssessment/ClientName-2026-10-25/ClientName-2026-10-25-Findings.json
+```
+
+You can also compare two saved runs later without signing in:
+`python3 -m google_gap_assessment.compare BEFORE-Findings.json AFTER-Findings.json`.
+Checks are matched by id. If the later run could read more checks than the earlier one, the score moves for that reason too, so read the
+"Now assessed" section alongside the score change.
 
 ---
 
