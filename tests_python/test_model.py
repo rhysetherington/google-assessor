@@ -209,3 +209,20 @@ class ReportDefaults(unittest.TestCase):
         from google_gap_assessment.metadata import DEFAULT_NAMES
         self.assertIn("Workspace", DEFAULT_NAMES["workspace"])
         self.assertNotIn("Workspace", DEFAULT_NAMES["cloud"])
+
+
+class HtmlReport(unittest.TestCase):
+    def test_not_assessed_reasons_are_grouped_and_the_lead_in_is_dropped(self):
+        from google_gap_assessment.report import _not_assessed_groups
+        same = "Could not be assessed in 1 project(s): t.example (DNS lookups were switched off (--no-dns), so this was not checked.)"
+        groups = _not_assessed_groups([{"Detail": same}, {"Detail": same}, {"Detail": "HTTP 403 denied"}])
+        self.assertEqual([2, 1], [len(items) for _, items in groups])
+        self.assertEqual("DNS lookups were switched off (--no-dns), so this was not checked.", groups[0][0])
+
+    def test_the_report_is_self_contained(self):
+        import re
+        from google_gap_assessment import report
+        from tests_python.workspace.ws_fakes import Tenant
+        from google_gap_assessment.assess import run_assessment
+        html = report.to_html(run_assessment(workspace=Tenant().session(), no_prompt=True))
+        self.assertIsNone(re.search(r'(?:src|href)="https?://', html))  # no fonts, scripts or images fetched from anywhere
