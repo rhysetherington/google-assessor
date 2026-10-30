@@ -25,6 +25,30 @@ Every check is mapped to SCF and NIST CSF 2.0. It is the Google sibling of the M
 > their policy IDs to show what each check covers, and records which of them it does not cover and why (see
 > [`Docs/Coverage.md`](Docs/Coverage.md)).
 
+## Objective and scope
+
+**Objective.** Give an IT administrator or consultant a repeatable, **read-only** way to measure how securely a Google environment is
+configured against published guidance, to show a client what to fix first, and later to show how far they have come. It is the Google sibling
+of the M365 Assessor and produces the same kind of scored report.
+
+**In scope**
+
+- **Google Workspace tenants**: identity and 2-step verification, Gmail and email authentication (including live SPF, DKIM, DMARC, MTA-STS and
+  TLS-RPT lookups), Drive and Docs sharing, Groups, Meet, Calendar, Chat, Classroom and Sites.
+- **Google Cloud**: projects, folders and organisations (IAM, logging, networking, Compute Engine, Cloud Storage, Cloud SQL, Cloud KMS and
+  organisation policy).
+- **Two commands**: *assess* (run an assessment) and *compare* (pick a saved assessment and compare it with a later one, earlier on the left).
+- **Reports** in HTML (for the client), Markdown and JSON, optional evidence CSVs, accepted-risk handling, and framework mappings to SCF,
+  NIST CSF 2.0, CIS Google Cloud Foundations and CISA SCuBA.
+
+**Out of scope, by design**
+
+- **Making changes.** The tool never fixes anything; it tells you what to change and how.
+- **Reading content.** It does not read mail, files or calendar contents, and asks the Directory API only for the fields it needs.
+- **Settings Google does not expose by API**, settings only visible in the admin audit log, and Gemini settings (field names could not be
+  verified). Each uncovered SCuBA policy is listed in [`Docs/Coverage.md`](Docs/Coverage.md) with the reason.
+- **Other clouds, and continuous monitoring.** A run is a point-in-time snapshot; compare runs to see change.
+
 ## Quick start
 
 > **Running this for a client or as an administrator?** Follow the step-by-step guide: [`Docs/Instructions.md`](Docs/Instructions.md).
@@ -150,17 +174,71 @@ check is judged at the top-level OU **and** wherever an OU or group overrides it
 
 ## Status and limits
 
-**The Google Cloud checks have been run against one live (empty) project. The Google Workspace checks have not yet been run against a live
-tenant**; they run against a fake tenant built from the documented API shapes. Their setting and field names come from CISA's reference
-implementation, which is used on live tenants. In addition, 10 of the 79 admin-console rule checks have been confirmed against real Policy API
-responses (CISA's published test data, no mismatches), and the reducer that turns Google's per-OU and per-group policies into one value is
-checked against that data's expected results. For the rest, a field that does not match your tenant shows up as *NotAssessed* rather than a
-wrong answer, but expect first-run tuning. Google's Policy API only returns settings your edition includes, and the admin-console settings it
-exposes are a subset of everything in the console.
+**What has been run live.** The Google Cloud checks have been run once against a free, empty project. The Google Workspace checks have been run
+several times against one newly created Workspace tenant (signed in as a Super Admin), including with the email DNS lookups on a domain the
+tester owns. In those runs 104 of the 108 Workspace checks returned a result; the other four settings (POP/IMAP, default link sharing,
+conflicting unmanaged accounts, multi-party approval) return no value on a tenant that has never changed them, so they stay *NotAssessed*
+rather than guess a default Google does not document.
+
+**What that does and does not show.** A live run proves the sign-in, the API calls, the policy reducer and the reports work against real
+Google responses, and that a real configuration change shows up in a comparison. It is **one blank tenant on one edition**, so it does not prove
+every check's pass and gap logic against every configuration. Setting and field names come from CISA's reference implementation, which is used on
+live tenants; in addition, 10 of the 79 admin-console rule checks have been confirmed against real Policy API responses (CISA's published test
+data, no mismatches), and the reducer that turns Google's per-OU and per-group policies into one value is checked against that data's expected
+results. For the rest, a field that does not match your tenant shows up as *NotAssessed* rather than a wrong answer. Google's Policy API only
+returns settings your edition includes, and the admin-console settings it exposes are a subset of everything in the console.
 
 Treat the output as a review aid, not an audit: the checks follow published guidance, some only approximate a recommendation, and a pass means
 the setting that was read looks right, not that the tenant is secure. CIS numbers follow v3.0.0 and should be confirmed against the edition you
 hold.
+
+## How it was built
+
+The work, in the order it happened:
+
+1. **Google Cloud assessor.** Started as a read-only PowerShell assessor over the `gcloud` CLI, then **ported to Python 3.11 using only the standard
+   library**, so there is nothing to install and it runs on macOS, Linux and Windows. (The PowerShell version is not part of this repository.)
+2. **Structured by domain.** Each area is its own module and each check is one function or one table row, so an auditor can redo a single check
+   (`--check ID`) without re-running everything. The report is stamped *PARTIAL ASSESSMENT* when that happens.
+3. **Read-only enforced in code, not by convention.** One gcloud gateway that only allows `list`, `describe` and `get-iam-policy`; a GET-only HTTPS
+   client with a host allowlist and read-only OAuth scopes for Workspace; tests that scan the source so a write cannot be added unnoticed.
+4. **Workspace support.** Built around the 138 CISA SCuBA policies (105 covered, the rest documented with a reason), reading the Cloud Identity
+   Policy API (with a reducer for per-OU and per-group overrides), the Directory API for users, groups, domains and admin roles, and DNS-over-HTTPS
+   for email authentication.
+5. **Its own sign-in.** The plan was to reuse `gcloud auth application-default login`. Testing showed gcloud refuses that credential without the
+   broad `cloud-platform` scope, which could change Cloud data. So the tool does its own browser sign-in (OAuth with PKCE, read-only scopes only,
+   held in memory, revoked when the run ends) and warns if it is ever given a write-capable token.
+6. **Honest scoring.** A setting that cannot be read is *NotAssessed* and counts against the score. It is never a pass.
+7. **Reports.** Markdown and JSON, then a client-ready HTML report (score ring, charts, a heat-map by area, an executive summary, filterable findings
+   and an optional logo), evidence CSVs and accepted-risk handling.
+8. **Compare.** A second command that lists saved assessments, lets the assessor pick the one to start from, and shows what was fixed, what got worse
+   and what is still open, earlier on the left and later on the right.
+9. **Documentation.** An administrator manual ([`Docs/Instructions.md`](Docs/Instructions.md)) and a generated coverage page
+   ([`Docs/Coverage.md`](Docs/Coverage.md)).
+
+## Testing
+
+| Layer | What it covers |
+|---|---|
+| **Offline tests** | Over 230 tests that run in about two seconds with Google replaced by fixtures: a fake tenant for every Workspace domain and a fake gcloud for Cloud. Each check has pass, gap and not-assessed cases |
+| **Real-data oracle** | The Policy API reducer is run against CISA's real published responses (CC0). This found a genuine bug (a missing reducer for list-type settings), since fixed |
+| **Read-only guarantees** | Tests scan the source: the only POSTs are OAuth housekeeping, the gcloud gateway rejects anything but read verbs, and hostile names in reports are escaped |
+| **Documentation guards** | Tests fail if the README's headline numbers or `Docs/Coverage.md` drift from the data |
+| **Continuous integration** | GitHub Actions runs the suite on Linux, macOS and Windows with Python 3.11 and 3.13 (this caught a Windows path bug) |
+| **Live: Google Cloud** | One read-only run against a free, empty project |
+| **Live: Google Workspace** | Several runs against a newly created tenant as a Super Admin, with and without the DNS lookups, and a before/after comparison after real configuration changes |
+
+**What live testing found, and what changed because of it**
+
+- gcloud's sign-in could not be used safely (see above), so the tool signs the admin in itself.
+- **False passes.** The first live run scored 84.3%, but 96 of those passes were really "the API is not enabled in the sign-in project". That is correct
+  for a Cloud project and wrong for Workspace. It now reports *NotAssessed* with the fix, and a test covers it.
+- **False email gaps.** Google's receive-only test alias domain (`<domain>.test-google-a.com`) was being checked for SPF, DKIM and DMARC. It cannot send
+  mail, so it is now skipped.
+- **Unset settings.** Where a setting has never been changed Google returns nothing. The tool applies a default only where Google documents it
+  (for example, per-user outbound gateways are off); otherwise the check stays *NotAssessed*.
+- A real change (sharing and app-access settings) was detected by the comparison as fixed gaps, and the new email results were separated from real
+  fixes under "Now assessed", so the score change is not overstated.
 
 ## Tests and extending
 
